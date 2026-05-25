@@ -214,6 +214,7 @@ jobs:
       - name: Merge repo
         run: |
           cd repo
+          pip install protobuf
           python ../PR/.github/scripts/merge-repo.py '${{ needs.prepare.outputs.delete }}' 'PR/repo'
 
       # Showing which extensions are to be updated with this PR
