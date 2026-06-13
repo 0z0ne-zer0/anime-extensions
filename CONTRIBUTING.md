@@ -329,18 +329,18 @@ use case. Each lib is self-documented via KDoc comments and/or a README in its o
 
 #### Available libs
 
-| Module                                                                                                    | Description                                                                             |
-|-----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`lib-cryptoaes`](https://github.com/yuzono/anime-extensions/tree/master/lib/cryptoaes)                 | AES-CBC decryption compatible with CryptoJS; JSFuck deobfuscation                       |
-| [`lib-dataimage`](https://github.com/yuzono/anime-extensions/tree/master/lib/dataimage)                 | Decodes base64 `data:image` strings into mock URLs that OkHttp can handle               |
-| [`lib-i18n`](https://github.com/yuzono/anime-extensions/tree/master/lib/i18n)                           | Internationalization helper (`Intl`) for multi-language UI strings in extensions        |
-| [`lib-lzstring`](https://github.com/yuzono/anime-extensions/tree/master/lib/lzstring)                   | LZ-String decompression and compression                                                 |
-| [`lib-randomua`](https://github.com/yuzono/anime-extensions/tree/master/lib/randomua)                   | Fetches and rotates real-world User-Agent strings (requires overriding `getAnimeUrl()`) |
-| [`lib-seedrandom`](https://github.com/yuzono/anime-extensions/tree/master/lib/seedrandom)               | Seeded deterministic pseudo-random number generation (ARC4-based)                       |
-| [`lib-synchrony`](https://github.com/yuzono/anime-extensions/tree/master/lib/synchrony)                 | JavaScript deobfuscation via the Synchrony engine (QuickJS sandbox)                     |
-| [`lib-textinterceptor`](https://github.com/yuzono/anime-extensions/tree/master/lib/textinterceptor)     | Renders plain text or HTML as a PNG image page                                          |
-| [`lib-unpacker`](https://github.com/yuzono/anime-extensions/tree/master/lib/unpacker)                   | Unpacks Dean Edwards-packed JavaScript; substring extraction helpers                    |
-| [`lib-zipinterceptor`](https://github.com/yuzono/anime-extensions/tree/master/lib/zipinterceptor)       | Decodes, stitches, and processes multi-page ZIP/AVIF/SVG image archives                 |
+| Module | Description |
+|---|---|
+| [`lib-cryptoaes`](https://github.com/yuzono/anime-extensions/tree/master/lib/cryptoaes) | AES-CBC decryption compatible with CryptoJS; JSFuck deobfuscation |
+| [`lib-dataimage`](https://github.com/yuzono/anime-extensions/tree/master/lib/dataimage) | Decodes base64 `data:image` strings into mock URLs that OkHttp can handle |
+| [`lib-i18n`](https://github.com/yuzono/anime-extensions/tree/master/lib/i18n) | Internationalization helper (`Intl`) for multi-language UI strings in extensions |
+| [`lib-lzstring`](https://github.com/yuzono/anime-extensions/tree/master/lib/lzstring) | LZ-String decompression and compression |
+| [`lib-randomua`](https://github.com/yuzono/anime-extensions/tree/master/lib/randomua) | Fetches and rotates real-world User-Agent strings (requires overriding `getAnimeUrl()`) |
+| [`lib-seedrandom`](https://github.com/yuzono/anime-extensions/tree/master/lib/seedrandom) | Seeded deterministic pseudo-random number generation (ARC4-based) |
+| [`lib-synchrony`](https://github.com/yuzono/anime-extensions/tree/master/lib/synchrony) | JavaScript deobfuscation via the Synchrony engine (QuickJS sandbox) |
+| [`lib-textinterceptor`](https://github.com/yuzono/anime-extensions/tree/master/lib/textinterceptor) | Renders plain text or HTML as a PNG image page |
+| [`lib-unpacker`](https://github.com/yuzono/anime-extensions/tree/master/lib/unpacker) | Unpacks Dean Edwards-packed JavaScript; substring extraction helpers |
+| [`lib-zipinterceptor`](https://github.com/yuzono/anime-extensions/tree/master/lib/zipinterceptor) | Decodes, stitches, and processes multi-page ZIP/AVIF/SVG image archives |
 
 > [!IMPORTANT]
 > If your module uses `:lib:randomua`, the Spotless check requires your extension to override the `getAnimeUrl()` method in your main class, or the build will fail.
@@ -663,9 +663,9 @@ val data = document.extractNextJs<MyDto> { element ->
 ```
 
 For client-side navigation responses (`text/x-component` content type), pass the `rsc: 1`
-request header and use `extractNextJsRsc` on the response body string.
-See [#14266](https://github.com/keiyoushi/extensions-source/pull/14266) and
-[#14446](https://github.com/keiyoushi/extensions-source/pull/14446) for real-world usage.
+request header. You can call `response.extractNextJs<T>()` directly on the `Response` object;
+the utility automatically inspects the `Content-Type` header and safely routes to `extractNextJsRsc`
+for you without needing to manually extract the response body string.
 
 ##### Extracting URLs - `setUrlWithoutDomain` + `absUrl`
 
@@ -676,6 +676,32 @@ When extracting URLs from HTML, prefer `element.absUrl("href")` or `element.attr
 setUrlWithoutDomain(element.attr("href"))
 // Safe:
 setUrlWithoutDomain(element.absUrl("href"))
+```
+
+##### GraphQL Requests - `graphQLPost` / `parseGraphQLAs`
+
+If a source uses a GraphQL API, use the dedicated `keiyoushi.utils` helpers to build requests and
+parse responses. These utilities automatically serialize variables, encode payload structures, and
+throw a `GraphQLException` if the response contains GraphQL errors.
+
+```kotlin
+import keiyoushi.utils.graphQLPost
+import keiyoushi.utils.parseGraphQLAs
+
+// Define your variables as a @Serializable class
+val variables = MyVariablesDto(page = 1)
+
+// Building the request:
+val request = graphQLPost(
+    url = "$baseUrl/graphql",
+    headers = headers,
+    operationName = "SearchManga",
+    query = $$"""query SearchManga($page: Int!) { ... }""",
+    variables = variables
+)
+
+// Parsing the response (automatically extracts the "data" object):
+val data = response.parseGraphQLAs<MyResponseDto>()
 ```
 
 #### Additional dependencies
@@ -790,10 +816,10 @@ overrides only the hoster flow.
   // Prefer:
   return GET("$baseUrl/anime", headers)
   ```
-- **GraphQL Queries:** If you are sending GraphQL requests, use Kotlin's raw multi-dollar string interpolation (`$$"""..."""`) for your queries. This prevents having to escape every JSON variable `$` symbol manually.
+- **GraphQL Queries:** If you are sending GraphQL requests, use Kotlin's raw multi-dollar string interpolation (`$$"""..."""`) for your queries. This prevents having to escape every JSON variable `$` symbol manually. For building the request and parsing the response, prefer the `graphQLPost` and `parseGraphQLAs` helpers in `keiyoushi.utils`.
 - **Empty checks on `.text()`:** Because Jsoup's `.text()` automatically trims whitespace, you can use `.isNotEmpty()` instead of `.isNotBlank()` when checking for empty strings. The same applies to `.ownText()`. This also means you should not use `.trim()` with these functions.
-- **Use `network.client` for Cloudflare:** When overriding the client for sources protected by Cloudflare, simply use `override val client = network.client.newBuilder()...`. The default `client` now handles Cloudflare challenges automatically. Do **not** use `network.cloudflareClient`, as it is deprecated.
-- **Never use `Thread.sleep()`:** Do not use `Thread.sleep()` for rate limiting. Use `keiyoushi.network.rateLimit` on the client builder instead.
+- **Use `network.client` for Cloudflare:** When overriding the client for sources, simply use `override val client = network.client.newBuilder()...`.
+- **Never use `Thread.sleep()`:** Do not use `Thread.sleep()` for rate limiting. Use the `keiyoushi.network.rateLimit` builder extension function on your `OkHttpClient.Builder` instead.
 - **Avoid synchronous calls in `parse` methods:** Do not call `client.newCall(...).execute()` inside parsing methods like `videoListParse` or `episodeListParse`. Make the request part of the standard flow by overriding the corresponding request method (e.g., `hosterListRequest`) or the suspend function (e.g., `getVideoList(hoster)`).
 - **Pass `HttpUrl` directly:** The `GET()` and `POST()` helpers accept an `HttpUrl` object. Do not call `.toString()` on a built `HttpUrl` before passing it.
 - **Use `HttpUrl` for URL manipulation:** When parsing or extracting parts of a URL, prefer using `HttpUrl` methods (like `pathSegments()` or `queryParameter()`) over manual string splitting (e.g., `.split("/")`) or regex. This ensures proper separation of concerns and protects against unexpected inputs-such as URL fragments or query parameters-without you needing to manually account for all edge cases.
