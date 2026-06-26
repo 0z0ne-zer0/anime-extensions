@@ -1,8 +1,0 @@
-ext {
-    extName = 'GoogleDriveIndex'
-    extClass = '.GoogleDriveIndex'
-    extVersionCode = 7
-    isNsfw = false
-}
-
-apply plugin: "kei.plugins.extension.legacy"

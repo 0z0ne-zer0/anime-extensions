@@ -21,7 +21,7 @@ or fixing it directly by submitting a Pull Request.
     - [Loading a subset of Gradle modules](#loading-a-subset-of-gradle-modules)
       - [Extension file structure](#extension-file-structure)
       - [AndroidManifest.xml (optional)](#androidmanifestxml-optional)
-      - [build.gradle](#buildgradle)
+      - [build.gradle.kts](#buildgradlekts)
     - [Core dependencies](#core-dependencies)
       - [Extension API](#extension-api)
       - [lib tools](#lib-tools)
@@ -246,7 +246,7 @@ The simplest extension structure looks like this:
 $ tree src/<lang>/<mysourcename>/
 src/<lang>/<mysourcename>/
 ├── AndroidManifest.xml (optional)
-├── build.gradle
+├── build.gradle.kts
 ├── res
 │   ├── mipmap-hdpi
 │   │   └── ic_launcher.png
@@ -286,30 +286,34 @@ Your extension code must be placed in the package `eu.kanade.tachiyomi.animeexte
 You only need to create this file if you want to add deep linking to your extension.
 See [URL intent filter](#url-intent-filter) for more information.
 
-#### build.gradle
+#### build.gradle.kts
 
-Make sure that your new extension's `build.gradle` file follows the following structure:
+Make sure that your new extension's `build.gradle.kts` file follows the following structure:
 
-```groovy
-ext {
-    extName = '<My source name>'
-    extClass = '.<MySourceName>'
-    extVersionCode = 1
-    isNsfw = true
+```kotlin
+plugins {
+    alias(kei.plugins.extension)
 }
 
-apply plugin: "kei.plugins.extension.legacy"
+yuzono {
+    name = "<My source name>"
+    className = "<MySourceName>"
+    versionCode = 1
+    contentWarning = ContentWarning.NSFW // Options: ContentWarning.SAFE, ContentWarning.MIXED, ContentWarning.NSFW
+    libVersion = "14"
+}
 ```
 
-| Field            | Description                                                                                                                                                                                                          |
-|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `extName`        | The name of the extension. Should be romanized if site name is not in English.                                                                                                                                       |
-| `extClass`       | Points to the class that implements `AnimeSource`. You can use a relative path starting with a dot (the package name is the base path). This is used to find and instantiate the source(s).                          |
-| `extVersionCode` | The extension version code. This must be a positive integer and incremented with any change to the code. Do not bump for changes that do not affect users, such as changing a private function to a public function. |
-| `isNsfw`         | Flag to indicate that a source contains NSFW content. Should always be set explicitly to either `true` or `false`. Falls back to `false` if not set.                                                                 |
-| `libVersion`     | Optional. The extensions-lib API level the extension targets. Falls back to `14` if not set. Set it to `16` once the extension implements the lib 16 API (see [Extensions lib 16](#extensions-lib-16)).               |
+| Field            | Description                                                                                                                                                                                                         |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`           | The name of the extension. Should be romanized if site name is not in English.                                                                                                                                      |
+| `className`      | Points to the class that implements `AnimeSource`. The relative path starting with a dot is inferred automatically. This is used to find and instantiate the source(s).                                                 |
+| `versionCode`    | The extension version code. This must be a positive integer and incremented with any change to the code. Do not bump for changes that do not affect users, such as changing a private function to a public function. |
+| `contentWarning` | Content safety classification. Must be set explicitly to one of `ContentWarning.SAFE`, `ContentWarning.MIXED`, or `ContentWarning.NSFW`.                                                                            |
+| `libVersion`     | The extension library version. Must be set explicitly: `"14"`, or `"16"` for extensions that implement the [lib 16](#extensions-lib-16) API.                                                                           |
 
-The extension's version name is generated automatically by concatenating the lib version and the resolved version code. With the example used above, the version would be `14.1`; with `libVersion = 16` it would be `16.1`.
+The extension's version name is generated automatically by concatenating `libVersion` and the calculated version code.
+With the example used above, the version would be `14.1`.
 
 ### Core dependencies
 
@@ -350,19 +354,19 @@ use case. Each lib is self-documented via KDoc comments and/or a README in its o
 
 #### Adding a lib dependency
 
-Declare the module in your extension's `build.gradle`:
+Declare the module in your extension's `build.gradle.kts`:
 
-```groovy
+```kotlin
 dependencies {
-    implementation(project(':lib:<name>'))
+    implementation(project(":lib:<name>"))
 }
 ```
 
 For example:
 
-```groovy
+```kotlin
 dependencies {
-    implementation(project(':lib:dataimage'))
+    implementation(project(":lib:dataimage"))
 }
 ```
 
@@ -706,7 +710,7 @@ val data = response.parseGraphQLAs<MyResponseDto>()
 
 #### Additional dependencies
 
-If you find yourself needing additional functionality, you can add more dependencies to your `build.gradle`
+If you find yourself needing additional functionality, you can add more dependencies to your `build.gradle.kts`
 file. Many of [the dependencies](https://github.com/komikku-app/anikku/blob/master/app/build.gradle.kts)
 from the app are exposed to extensions by default.
 
@@ -724,7 +728,7 @@ the main app has at the expense of app size.
 
 ### Extension main class
 
-The class which is referenced and defined by `extClass` in `build.gradle`. This class should implement
+The class which is referenced and defined by `className` in `build.gradle.kts`. This class should implement
 either `AnimeSourceFactory` or `AnimeHttpSource`.
 
 | Class                   | Description                                                                                                                           |
@@ -752,7 +756,7 @@ The repository compiles against [aniyomi-extensions-lib](https://github.com/komi
 Most existing extensions still extend the `keiyoushi.utils.AnimeHttpLegacySource` or
 `ParsedAnimeHttpLegacySource` shims. They keep the old `videoListRequest(episode)` /
 `videoListParse(response)` methods and wrap the result into a single hoster with `toHosterList()`.
-Extensions that only use the shims keep the default lib version `14`.
+Extensions that only use the shims stay on `libVersion = "14"`.
 
 When writing a new extension, or migrating an existing one:
 
@@ -760,7 +764,7 @@ When writing a new extension, or migrating an existing one:
 - Implement the [hoster flow](#hosters-and-videos); implement [seasons](#seasons) only if the site
   needs them, otherwise throw `UnsupportedOperationException()` from `seasonListParse`.
 - Build videos with the [new `Video` constructor](#hosters-and-videos).
-- Add `libVersion = 16` to the `ext` block in `build.gradle`, and bump the version code as usual.
+- Set `libVersion = "16"` in the `yuzono` block of `build.gradle.kts`, and bump the version code as usual.
   This also applies when only the extension implements the hoster flow on top of a theme that still
   uses a shim, as `src/pt/animeito` does.
 
@@ -1184,7 +1188,7 @@ sites use the same site generator tool (usually a CMS) for bootstrapping their w
 them similar enough to prompt code reuse through inheritance/composition; which from now on we will
 use the general **theme** term to refer to.
 
-Themes are provided as libraries within `lib-multisrc`. You can apply a theme to an extension by specifying the `themePkg` property in its `build.gradle` file.
+Themes are provided as libraries within `lib-multisrc`. You can apply a theme to an extension by specifying the `theme` property in its `build.gradle.kts` file.
 
 ### Creating a new theme
 
@@ -1216,12 +1220,16 @@ plugins {
     alias(kei.plugins.multisrc)
 }
 
-baseVersionCode = 1
+yuzono {
+    baseVersionCode = 1
+    libVersion = "14"
+}
 ```
 
 | Field             | Description                                                                                                                                                                   |
 |-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `baseVersionCode` | The base version code for the theme. This must be a positive integer and **incremented** whenever a change is made to the theme's implementation that affects the extensions. |
+| `libVersion`      | The extension library version the theme targets: `"14"` if it extends a legacy shim, `"16"` if it implements the lib 16 API. Extensions using the theme can't set a lower one. |
 
 #### Theme main class
 
@@ -1245,21 +1253,24 @@ abstract class <ThemeName>(
 
 ### Using a Theme
 
-To use a theme in your extension, follow the regular extension creation steps and add the `themePkg` property to your `build.gradle`:
+To use a theme in your extension, follow the regular extension creation steps and configure `theme` in your `build.gradle.kts`:
 
-```groovy
-ext {
-    extName = '<My source name>'
-    extClass = '.<MySourceName>'
-    themePkg = '<theme_name>'
-    overrideVersionCode = 1
-    isNsfw = true
+```kotlin
+plugins {
+    alias(kei.plugins.extension)
 }
 
-apply plugin: "kei.plugins.extension.legacy"
+yuzono {
+    name = "<My source name>"
+    className = "<MySourceName>"
+    theme = "<theme_name>"
+    versionCode = 1
+    contentWarning = ContentWarning.NSFW // Options: ContentWarning.SAFE, ContentWarning.MIXED, ContentWarning.NSFW
+    libVersion = "14"
+}
 ```
 
-Notice that instead of `extVersionCode`, extensions using a theme must use `overrideVersionCode`. The final extension version code (`extVersionCode`) is automatically calculated during the build process as `theme.baseVersionCode + ext.overrideVersionCode`.
+The final extension version code is automatically calculated during the build process as `theme.baseVersionCode + versionCode`.
 
 Because themes are provided as libraries, your extension's main class will directly inherit from the theme's base class.
 
@@ -1459,10 +1470,10 @@ can find it below.
 
 ### Pull Request checklist
 
-- Updated `extVersionCode` value in `build.gradle` for individual extensions
-- Updated `overrideVersionCode` or `baseVersionCode` as needed for all multisrc extensions
+- Updated `versionCode` value in `build.gradle.kts`
+- Updated `baseVersionCode` in `build.gradle.kts` (if updated multisrc theme code)
 - Referenced all related issues in the PR body (e.g. "Closes #xyz")
-- Added the `isNsfw = true` flag in `build.gradle` when appropriate
+- Set the `contentWarning` configuration in `build.gradle.kts` appropriately
 - Have not changed source names
 - Have explicitly kept the `id` if a source's name or language were changed
 - Have tested the modifications by compiling and running the extension through Android Studio

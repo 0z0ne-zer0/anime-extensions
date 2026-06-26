@@ -47,9 +47,9 @@ loadIndividualExtension("en", "miruro")
 
 ## Structure
 
-- `src/<lang>/<source>/build.gradle` – extension metadata (`extName`, `extClass`, `extVersionCode` **or** `themePkg`+`overrideVersionCode`, `isNsfw`, optional `libVersion`)
+- `src/<lang>/<source>/build.gradle.kts` – extension metadata in the `yuzono { }` block (`name`, `className`, `versionCode`, `contentWarning`, `libVersion`, plus `theme`/`baseUrl` for themed extensions)
 - `src/<lang>/<source>/src/eu/kanade/tachiyomi/animeextension/<lang>/<source>/` – source code (package must match)
-- `lib-multisrc/<theme>/build.gradle.kts` – theme base (`baseVersionCode`, `alias(kei.plugins.multisrc)`)
+- `lib-multisrc/<theme>/build.gradle.kts` – theme base (`alias(kei.plugins.multisrc)`, `yuzono { baseVersionCode; libVersion }`)
 - `lib-multisrc/<theme>/src/.../multisrc/<theme>/` – abstract theme class `extends AnimeHttpSource`
 - `lib/` – reusable libs (`lib-cryptoaes`, `lib-playlistutils`, extractors, etc.)
 - `core` – `keiyoushi.utils` (`parseAs`, `toJsonRequestBody`, `tryParse`, `extractNextJs`, `absUrl`) and `keiyoushi.network` (`rateLimit`, `addCookie`, `OkHttpClient.get`/`post`) – use these, no custom JSON/regex/date/interceptor helpers
@@ -64,7 +64,7 @@ See `CONTRIBUTING.md` for full rules. Critical for agents:
 - Use `response.parseAs<T>()`, `response.asJsoup()`, `SimpleDateFormat(...).tryParse()`, `element.absUrl("href")` + `setUrlWithoutDomain()`.
 - No hardcoded `User-Agent`, no `Thread.sleep()`, no manual Cloudflare checks, no `buildJsonObject` for requests.
 - Preserve `id` when renaming `name`/`lang`; keep package name stable.
-- New or migrated extensions target extensions-lib 16: extend `AnimeHttpSource` directly (not the `keiyoushi.utils.AnimeHttpLegacySource`/`ParsedAnimeHttpLegacySource` shims), implement hosters (`getHosterList`/`getVideoList(hoster)`), use the named `Video(videoUrl =, videoTitle =, ...)` constructor, and set `libVersion = 16` in `build.gradle`. See `CONTRIBUTING.md#extensions-lib-16`.
+- New or migrated extensions target extensions-lib 16: extend `AnimeHttpSource` directly (not the `keiyoushi.utils.AnimeHttpLegacySource`/`ParsedAnimeHttpLegacySource` shims), implement hosters (`getHosterList`/`getVideoList(hoster)`), use the named `Video(videoUrl =, videoTitle =, ...)` constructor, and set `libVersion = "16"` in `build.gradle.kts`. See `CONTRIBUTING.md#extensions-lib-16`.
 
 ### `keiyoushi.network` client helpers
 
@@ -89,18 +89,18 @@ See `CONTRIBUTING.md` for full rules. Critical for agents:
 
 ## Versioning – bump once per PR, theme bump propagates
 
-Source of truth: `CONTRIBUTING.md:287-309` (individual) + `CONTRIBUTING.md:1124-1176` (themes) + `gradle/build-logic/src/main/kotlin/PluginExtensionLegacy.kt:61`:
+Source of truth: `CONTRIBUTING.md:289-316` (individual) + `CONTRIBUTING.md:1214-1273` (themes) + `gradle/build-logic/src/main/kotlin/PluginExtension.kt:111`:
 
 ```kotlin
-versionCode = if (theme == null) extVersionCode else theme.baseVersionCode + overrideVersionCode
+versionCode = if (theme == null) keiyoushi.versionCode else theme.baseVersionCode + keiyoushi.versionCode
 ```
 
 Rules:
 
-- Individual extension (no theme): increment `extVersionCode` by **1** if code affecting users changed. Bump **once per PR** – do not increment multiple times across commits.
+- Individual extension (no theme): increment `versionCode` by **1** if code affecting users changed. Bump **once per PR** – do not increment multiple times across commits.
 - Theme (`lib-multisrc/<theme>/build.gradle.kts`): increment `baseVersionCode` by **1** when theme logic changes.
-- When `baseVersionCode` is bumped, **do not** bump `overrideVersionCode` for extensions using that theme in the same PR – the addition already bumps every extension's effective `versionCode`. Only bump `overrideVersionCode` when the individual extension itself changed independently of the theme.
-- Checklist mirrors this: `CONTRIBUTING.md#pull-request-checklist` ~ `1376-1377` and `.github/pull_request_template.md:3-4`.
+- When `baseVersionCode` is bumped, **do not** bump `versionCode` for extensions using that theme in the same PR – the addition already bumps every extension's effective version code. Only bump the extension's `versionCode` when the extension itself changed independently of the theme.
+- Checklist mirrors this: `CONTRIBUTING.md#pull-request-checklist` ~ `1473-1474` and `.github/pull_request_template.md:3-4`.
 
 ## CI – what it bumps and builds for you
 
@@ -115,7 +115,7 @@ From `.github/workflows/build_pull_request.yml` + `.github/scripts/`:
 
 ## Boundaries
 
-- Do not change `versionName` manually (generated `<libVersion>.<versionCode>`, lib version defaults to `14`).
+- Do not change `versionName` manually (generated `<libVersion>.<versionCode>`; set `libVersion = "14"` unless the extension uses the lib 16 API, and never lower than its theme's `libVersion`).
 - Do not commit `web_hi_res_512.png` (delete after Icon Generator).
 - Do not push to `upstream` (`no_pushing` – fork workflow `CONTRIBUTING.md:170-196`). Use `origin` (your fork) for PRs.
 - Never commit secrets, keystore, or `local.properties`.
