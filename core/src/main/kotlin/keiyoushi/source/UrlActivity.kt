@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.en.xanime
+package keiyoushi.source
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -10,22 +10,19 @@ import kotlin.system.exitProcess
 class UrlActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val intentData = intent?.data?.toString()
-        if (intentData != null) {
-            val mainIntent = Intent().apply {
-                action = "eu.kanade.tachiyomi.ANIMESEARCH"
-                putExtra("query", intentData)
+        val data = intent.data
+        if (data != null) {
+            val intent = Intent().apply {
+                setAction("eu.kanade.tachiyomi.ANIMESEARCH")
+                putExtra("query", data.toString())
                 putExtra("filter", packageName)
             }
-
             try {
-                startActivity(mainIntent)
+                startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Log.e("XAnimeUrlActivity", "Unable to launch activity", e)
+                Log.e(packageName, "Unable to launch activity", e)
             }
         }
-
         finish()
         exitProcess(0)
     }

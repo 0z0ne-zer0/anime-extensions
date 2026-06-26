@@ -8,4 +8,9 @@ yuzono {
     versionCode = 10
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("rule34video.com")
+        path("/videos/..*")
+    }
 }

@@ -8,6 +8,12 @@ yuzono {
     versionCode = 15
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("rou.video")
+        path("/t/.*")
+        path("/v/.*")
+    }
 }
 
 dependencies {

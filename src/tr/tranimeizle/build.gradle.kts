@@ -8,6 +8,11 @@ yuzono {
     versionCode = 38
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("www.tranimeizle.io")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

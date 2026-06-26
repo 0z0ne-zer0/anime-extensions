@@ -8,6 +8,12 @@ yuzono {
     versionCode = 5
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("goyabu.to")
+        path("/..*")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

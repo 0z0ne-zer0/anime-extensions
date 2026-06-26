@@ -8,6 +8,11 @@ yuzono {
     versionCode = 47
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("anizm.net")
+        path("/..*")
+    }
 }
 
 dependencies {

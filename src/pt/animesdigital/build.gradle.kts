@@ -8,6 +8,11 @@ yuzono {
     versionCode = 10
     contentWarning = ContentWarning.SAFE
     libVersion = "16"
+
+    deeplink {
+        host("animesdigital.org")
+        path("/anime/a/..*")
+    }
 }
 
 dependencies {

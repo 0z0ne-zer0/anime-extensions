@@ -8,6 +8,11 @@ yuzono {
     versionCode = 22
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("www.verseriesonline.net")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

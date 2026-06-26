@@ -8,4 +8,9 @@ yuzono {
     versionCode = 3
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("www.az-animex.com")
+        path("/anime/..*")
+    }
 }

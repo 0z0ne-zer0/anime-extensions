@@ -8,6 +8,11 @@ yuzono {
     versionCode = 12
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("www.myrunningman.com")
+        path("/ep/..*")
+    }
 }
 
 dependencies {

@@ -8,6 +8,11 @@ yuzono {
     versionCode = 31
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("supjav.com")
+        path("/..*\\\\.html")
+    }
 }
 
 dependencies {

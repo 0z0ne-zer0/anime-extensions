@@ -8,6 +8,11 @@ yuzono {
     versionCode = 36
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("animeler.me")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

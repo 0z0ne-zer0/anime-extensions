@@ -8,6 +8,11 @@ yuzono {
     versionCode = 7
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("nimegami.id")
+        path("/..*")
+    }
 }
 
 dependencies {

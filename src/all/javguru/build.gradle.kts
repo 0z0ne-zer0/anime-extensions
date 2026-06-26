@@ -8,6 +8,11 @@ yuzono {
     versionCode = 47
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("jav.guru")
+        path("/.*/..*")
+    }
 }
 
 dependencies {

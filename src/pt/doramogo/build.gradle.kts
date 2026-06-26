@@ -8,6 +8,11 @@ yuzono {
     versionCode = 21
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("doramogo.com")
+        path("/dorama/..*")
+    }
 }
 
 dependencies {

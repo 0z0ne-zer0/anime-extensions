@@ -8,4 +8,9 @@ yuzono {
     versionCode = 4
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("donghuanosekai.com")
+        path("/..*")
+    }
 }

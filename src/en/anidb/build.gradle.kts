@@ -8,6 +8,11 @@ yuzono {
     versionCode = 7
     contentWarning = ContentWarning.NSFW
     libVersion = "16"
+
+    deeplink {
+        host("anidb.app")
+        path("/anime/.*")
+    }
 }
 
 dependencies {

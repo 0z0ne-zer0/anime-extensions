@@ -8,6 +8,11 @@ yuzono {
     versionCode = 29
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("franime.fr")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

@@ -8,4 +8,9 @@ yuzono {
     versionCode = 12
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("hstream.moe")
+        path("/hentai/..*")
+    }
 }

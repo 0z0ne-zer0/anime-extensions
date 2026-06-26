@@ -8,6 +8,11 @@ yuzono {
     versionCode = 34
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("www.hdfilmcehennemi.nl")
+        path("/..*")
+    }
 }
 
 dependencies {

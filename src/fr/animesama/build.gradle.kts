@@ -8,6 +8,12 @@ yuzono {
     versionCode = 32
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("anime-sama.si")
+        host("anime-sama.tv")
+        path("/catalogue/..*")
+    }
 }
 
 dependencies {

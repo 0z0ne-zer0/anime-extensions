@@ -5,4 +5,8 @@ plugins {
 yuzono {
     baseVersionCode = 4
     libVersion = "14"
+
+    deeplink {
+        path("/.*/..*")
+    }
 }

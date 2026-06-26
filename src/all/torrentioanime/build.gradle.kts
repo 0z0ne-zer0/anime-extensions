@@ -8,4 +8,9 @@ yuzono {
     versionCode = 23
     contentWarning = ContentWarning.SAFE
     libVersion = "16"
+
+    deeplink {
+        host("torrentio.strem.fun")
+        path("/anime/..*")
+    }
 }

@@ -8,6 +8,11 @@ yuzono {
     versionCode = 62
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("kaa.lt")
+        path("/..*")
+    }
 }
 
 dependencies {

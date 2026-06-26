@@ -8,6 +8,11 @@ yuzono {
     versionCode = 2
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("sushianimes.com.br")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

@@ -8,6 +8,14 @@ yuzono {
     versionCode = 10
     contentWarning = ContentWarning.SAFE
     libVersion = "16"
+
+    deeplink {
+        host("animefire.one")
+        host("animefire.io")
+        host("animefire.plus")
+        path("/anime/..*")
+        path("/animes/..*")
+    }
 }
 
 dependencies {

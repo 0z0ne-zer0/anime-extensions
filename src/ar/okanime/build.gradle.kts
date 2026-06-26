@@ -8,6 +8,11 @@ yuzono {
     versionCode = 28
     contentWarning = ContentWarning.SAFE
     libVersion = "14"
+
+    deeplink {
+        host("www.okanime.xyz")
+        path("/anime/..*")
+    }
 }
 
 dependencies {

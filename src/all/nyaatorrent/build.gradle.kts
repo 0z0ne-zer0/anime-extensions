@@ -8,4 +8,9 @@ yuzono {
     versionCode = 4
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+
+    deeplink {
+        host("nyaa.si")
+        path("/view/..*")
+    }
 }

@@ -20,7 +20,6 @@ or fixing it directly by submitting a Pull Request.
     - [Setting up a new Gradle module](#setting-up-a-new-gradle-module)
     - [Loading a subset of Gradle modules](#loading-a-subset-of-gradle-modules)
       - [Extension file structure](#extension-file-structure)
-      - [AndroidManifest.xml (optional)](#androidmanifestxml-optional)
       - [build.gradle.kts](#buildgradlekts)
     - [Core dependencies](#core-dependencies)
       - [Extension API](#extension-api)
@@ -245,7 +244,6 @@ The simplest extension structure looks like this:
 ```console
 $ tree src/<lang>/<mysourcename>/
 src/<lang>/<mysourcename>/
-├── AndroidManifest.xml (optional)
 ├── build.gradle.kts
 ├── res
 │   ├── mipmap-hdpi
@@ -267,8 +265,7 @@ src/<lang>/<mysourcename>/
                         └── <mysourcename>
                             ├── <MySourceName>.kt
                             ├── <Dto>.kt (optional)
-                            ├── <Filters>.kt (optional)
-                            └── <UrlActivity>.kt (optional)
+                            └── <Filters>.kt (optional)
 
 ```
 
@@ -277,14 +274,9 @@ should be adapted from the site name, and can only contain lowercase ASCII lette
 Your extension code must be placed in the package `eu.kanade.tachiyomi.animeextension.<lang>.<mysourcename>`.
 
 > [!TIP]
-> Additional files in the extension package (like `Dto.kt`, `Filters.kt`, `UrlActivity.kt`)
+> Additional files in the extension package (like `Dto.kt`, `Filters.kt`)
 > should NOT repeat the extension name (e.g. use `Dto.kt` instead of `MySourceNameDto.kt`).
 > Note: While older extensions might use the repeated name pattern, avoiding it is a newly enforced convention to maintain consistency across the repository.
-
-#### AndroidManifest.xml (optional)
-
-You only need to create this file if you want to add deep linking to your extension.
-See [URL intent filter](#url-intent-filter) for more information.
 
 #### build.gradle.kts
 
@@ -311,6 +303,7 @@ yuzono {
 | `versionCode`    | The extension version code. This must be a positive integer and incremented with any change to the code. Do not bump for changes that do not affect users, such as changing a private function to a public function. |
 | `contentWarning` | Content safety classification. Must be set explicitly to one of `ContentWarning.SAFE`, `ContentWarning.MIXED`, or `ContentWarning.NSFW`.                                                                            |
 | `libVersion`     | The extension library version. Must be set explicitly: `"14"`, or `"16"` for extensions that implement the [lib 16](#extensions-lib-16) API.                                                                           |
+| `deeplink {}`    | Declares a URL deeplink intent filter. See [URL intent filter](#url-intent-filter).                                                                                                                                  |
 
 The extension's version name is generated automatically by concatenating `libVersion` and the calculated version code.
 With the example used above, the version would be `14.1`.
@@ -1023,7 +1016,6 @@ value. Also use this pattern for unused inherited methods.
 - **Avoid hardcoded host checks:** When checking URLs in deep links or search overrides, avoid hardcoding the host string (e.g., `queryUrl.host == "site.com"`). This breaks if mirrors are added. Prefer checking against the source's `baseUrl` dynamically.
 - **Empty Lists vs Exceptions:** If `videoListParse` or `episodeListParse` finds no items (e.g., a locked or empty episode), return `emptyList()` instead of throwing a hardcoded exception. The app will display a properly localized error message to the user.
 - **Avoid excessive comments:** Do not add verbose, redundant, or AI-generated comments that explain obvious code. Keep the code clean and self-documenting.
-- **UrlActivity exceptions:** Catch `Throwable` instead of `Exception` in `UrlActivity` to ensure all potential crashes are handled gracefully.
 
 #### Configurable Sources and Preferences
 
@@ -1034,84 +1026,50 @@ value. Also use this pattern for unused inherited methods.
 
 #### URL intent filter
 
-Extensions can define a URL pattern so that these URLs can be opened in Anikku.
+Extensions can handle URLs from a browser or other apps by declaring deeplinks in `build.gradle.kts`. When a matching URL is opened on the device, Anikku launches and receives the URL as a search query.
 
-To do this, you need two files:
-
-- `AndroidManifest.xml` which must be placed in the root directory of your extension (Example: `src/all/nyaatorrent/AndroidManifest.xml`)
-- `UrlActivity.kt` which should be placed next to your main file. (Example: `src/all/nyaatorrent/src/eu/kanade/tachiyomi/animeextension/all/nyaatorrent/NyaaTorrentUrlActivity.kt`)
-
-`AndroidManifest.xml` example :
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <application>
-        <activity
-            android:name=".<lang>.<mysourcename>.UrlActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:theme="@android:style/Theme.NoDisplay">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="mysite.com"
-                    android:pathPattern="/..*"
-                    android:scheme="https" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
-```
-
-The `AndroidManifest.xml` file will contain an `android:name` attribute that refers to the path of your `UrlActivity.kt` file. For example, for NyaaTorrent (`src/all/nyaatorrent`) the `android:name` is `.all.nyaatorrent.NyaaTorrentUrlActivity`.
-
-Next, you have the `<data android:scheme="https" android:host="host" android:pathPattern="/..*" />` element; you can have it multiple times, which allows you to specify the URL that can be opened in Anikku. Every host you add here must also be accepted by the URL check in `getSearchAnime` below. You can read more about this in Android's [`<data>` documentation](https://developer.android.com/guide/topics/manifest/data-element).
-
-Now, as for `UrlActivity`, you can just use the example below.
-
-> [!CAUTION]
-> The activity does not support any Kotlin Intrinsics specific methods or calls,
-> and using them will cause crashes in the activity. Consider using Java's equivalent
-> methods instead, such as using `String`'s `equals()` instead of using `==`.
->
-> You can use Kotlin Intrinsics in the extension source class, this limitation only
-> applies to the activity classes.
-
-To explain how it works, it will trigger Anikku's `ANIMESEARCH` action, passing the URL as a query and specifying that it comes from your extension to narrow down the search. Avoid putting any logic in this file; instead, implement it in your extension's class.
+Add one or more `deeplink {}` blocks inside the `yuzono {}` block:
 
 ```kotlin
-class UrlActivity : Activity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val intentData = intent?.data?.toString()
-        if (intentData != null) {
-            val mainIntent = Intent().apply {
-                action = "eu.kanade.tachiyomi.ANIMESEARCH"
-                putExtra("query", intentData)
-                putExtra("filter", packageName)
-            }
-            try {
-                startActivity(mainIntent)
-            } catch (e: Throwable) {
-                Log.e("MySiteUrl", e.toString())
-            }
-        } else {
-            Log.e("MySiteUrl", "could not parse uri from intent $intent")
-        }
+yuzono {
+    name = "My Source"
+    // ...
 
-        finish()
-        exitProcess(0)
+    deeplink {
+        host("example.com")
+        path("/anime/..*")
+        path("/watch/..*")
     }
 }
 ```
 
-Now all you need to do is adapt the search function (`getSearchAnime`) in your extension so that, given a URL, it returns a single anime that matches that URL. For example:
+| DSL call | Description |
+|---|---|
+| `host("example.com")` | A hostname to match. Call multiple times to register multiple hosts. If omitted, the host is derived from `baseUrl` automatically. |
+| `path("/anime/..*")` | A path pattern in Android [`pathPattern`](https://developer.android.com/guide/topics/manifest/data-element#path) syntax. Call multiple times to match multiple paths. At least one `path()` call is required — a `deeplink {}` block with no paths produces no intent filter. |
+
+Multiple `deeplink {}` blocks create independent intent filters, which is useful when different hosts or path groups need to be handled separately:
+
+```kotlin
+deeplink {
+    host("example.com")
+    path("/anime/..*")
+}
+
+deeplink {
+    host("watch.example.com")
+    path("/episode/..*")
+}
+```
+
+No `AndroidManifest.xml` or `UrlActivity.kt` is needed — they are generated and provided automatically by the build system. The generated intent filter accepts both `http` and `https` URLs.
+
+> [!NOTE]
+> To match a literal `.` or `*`, Android expects `\\.` or `\\*` in the manifest. `path()` is written into the generated manifest as is, so in a Kotlin string that takes four backslashes: `path("/..*\\\\.html")`.
+
+If the extension uses a theme (via `theme = "<theme_name>"`), deeplinks defined in the theme's `build.gradle.kts` are automatically merged in, so individual extensions using that theme do not need to repeat shared URL patterns.
+
+Once deeplinks are declared, implement URL handling inside `getSearchAnime`. When a deeplink is triggered, the app fires a search with the full URL as the query, so every host you declare must also be accepted by that URL check:
 
 ```kotlin
 override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
@@ -1128,15 +1086,14 @@ override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilt
 }
 ```
 
-To test if the URL intent filter is working as expected, you can try opening the website in a browser
-and navigating to the endpoint that was added as a filter or clicking a hyperlink. Alternatively,
-you can use the `adb` command below.
+> [!NOTE]
+> Avoid checking for hardcoded host strings (e.g. `url.host == "site.com"`). Prefer comparing against the source's `baseUrl` dynamically so mirror support is not broken.
+
+To test if the URL intent filter is working as expected, you can use the `adb` command below:
 
 ```bash
 adb shell am start -d "<your-link>" -a android.intent.action.VIEW
 ```
-
-You can find a complete example of how URLs work in the [NyaaTorrent extension](https://github.com/yuzono/anime-extensions/tree/master/src/all/nyaatorrent).
 
 #### Update strategy
 
@@ -1226,10 +1183,27 @@ yuzono {
 }
 ```
 
+If the CMS generates URLs with a consistent structure shared by all sites built on it, you can declare deeplinks here too. Every extension using this theme will automatically inherit them:
+
+```kotlin
+yuzono {
+    baseVersionCode = 1
+    libVersion = "14"
+
+    deeplink {
+        path("/anime/..*")
+        path("/episode/..*")
+    }
+}
+```
+
+When no `host()` is specified in a theme `deeplink {}` block, the host is resolved at build time from each individual extension's `baseUrl`, so the same path patterns apply to every site without hardcoding hostnames in the theme.
+
 | Field             | Description                                                                                                                                                                   |
 |-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `baseVersionCode` | The base version code for the theme. This must be a positive integer and **incremented** whenever a change is made to the theme's implementation that affects the extensions. |
 | `libVersion`      | The extension library version the theme targets: `"14"` if it extends a legacy shim, `"16"` if it implements the lib 16 API. Extensions using the theme can't set a lower one. |
+| `deeplink {}`     | Declares URL deeplink patterns inherited by all extensions using this theme. See [URL intent filter](#url-intent-filter).                                                      |
 
 #### Theme main class
 
