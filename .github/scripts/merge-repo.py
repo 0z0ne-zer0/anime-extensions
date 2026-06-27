@@ -88,9 +88,6 @@ with REMOTE_REPO.joinpath("index.json").open("w", encoding="utf-8") as index_fil
     index_file.write(json_format.MessageToJson(index, always_print_fields_with_no_presence=False, preserving_proto_field_name=True))
 
 with REMOTE_REPO.joinpath("index.pb").open("wb") as index_pb_file:
-    index_pb_file.write(index.SerializeToString())
-
-with REMOTE_REPO.joinpath("index.pb.gz").open("wb") as index_pb_file:
     index_pb_file.write(gzip.compress(index.SerializeToString()))
 
 legacy_json_index = []
