@@ -109,19 +109,19 @@ class PluginExtension : Plugin<Project> {
             }
         }
 
-        val extClassProvider = keiyoushi.className.map { if (it.startsWith(".")) it else ".$it" }
+        val themeExtension = keiyoushi.theme.map { themeName ->
+            project(":lib-multisrc:$themeName").extensions.findByType(KeiyoushiMultisrcExtension::class.java)
+                ?: throw AssertionError("Theme project :lib-multisrc:$themeName must apply kei.plugins.multisrc")
+        }
 
-        val versionCodeProvider = keiyoushi.theme.map { themeName ->
-            val themeProject = project(":lib-multisrc:$themeName")
-            val themeKeiyoushi = themeProject.extensions.findByType(KeiyoushiMultisrcExtension::class.java)
-                ?: throw AssertionError("Theme project ${themeProject.path} must apply kei.plugins.multisrc")
-            val themeLibVersion = themeKeiyoushi.libVersion.get()
-            val extLibVersion = keiyoushi.libVersion.get()
+        val versionCodeProvider = themeExtension.flatMap { themeKeiyoushi ->
+            val themeLib = themeKeiyoushi.libVersion.get()
+            val extLib = keiyoushi.libVersion.get()
             // A lib 16 extension may implement the hoster flow on top of a theme that still uses the legacy shims
-            assertWithoutFlag(extLibVersion.toDouble() >= themeLibVersion.toDouble()) {
-                "Extension libVersion ($extLibVersion) must not be lower than multisrc ($themeName) libVersion ($themeLibVersion)."
+            assertWithoutFlag(extLib.toDouble() >= themeLib.toDouble()) {
+                "Extension libVersion ($extLib) must not be lower than multisrc (${keiyoushi.theme.get()}) libVersion ($themeLib)."
             }
-            themeKeiyoushi.baseVersionCode.get() + keiyoushi.versionCode.get()
+            themeKeiyoushi.baseVersionCode.zip(keiyoushi.versionCode) { base, ext -> base + ext }
         }.orElse(keiyoushi.versionCode)
 
         val versionNameProvider = keiyoushi.libVersion.flatMap { libVersion ->
@@ -131,39 +131,37 @@ class PluginExtension : Plugin<Project> {
             versionCodeProvider.map { "$libVersion.$it" }
         }
 
-        val appNameProvider = keiyoushi.name.map { name ->
-            assertWithoutFlag(name.all { it.code < 0x180 }) { "Extension name should be romanized" }
-            "Aniyomi: $name"
+        val classNameProvider = keiyoushi.className.map { name ->
+            assertWithoutFlag(!name.startsWith(".")) { "className must not start with '.'" }
+            name
         }
 
-        val nsfwProvider = keiyoushi.contentWarning.map { if (it == ContentWarning.SAFE) "0" else "1" }
+        val themeDeeplinks = themeExtension
+            .flatMap { it.deeplinks }
+            .orElse(emptyList())
 
-        val torrentProvider = keiyoushi.torrent.map { if (it) "1" else "0" }.orElse("0")
-
-        val contentWarningProvider = keiyoushi.contentWarning.map {
-            when (it) {
-                ContentWarning.SAFE -> "0"
-                ContentWarning.MIXED -> "1"
-                ContentWarning.NSFW -> "2"
+        val deeplinksProvider = keiyoushi.deeplinks
+            .zip(themeDeeplinks) { local, theme -> local + theme }
+            .zip(keiyoushi.baseUrl.orElse("")) { specs, baseUrl ->
+                val defaultHost = baseUrl.takeIf { it.isNotEmpty() }
+                    ?.split("://")?.getOrNull(1)
+                    ?.split("/")?.first()
+                    ?.takeIf { it.isNotEmpty() }
+                specsToFilters(specs, defaultHost)
             }
-        }
-
-        val deeplinksProvider = provider {
-            val defaultHost = keiyoushi.baseUrl.orNull
-                ?.split("://")?.getOrNull(1)
-                ?.split("/")?.first()
-                ?.takeIf { it.isNotEmpty() }
-            val localSpecs = keiyoushi.deeplinks.getOrElse(emptyList())
-            val themeSpecs = keiyoushi.theme.orNull?.let { themeName ->
-                project(":lib-multisrc:$themeName")
-                    .extensions.findByType(KeiyoushiMultisrcExtension::class.java)
-                    ?.deeplinks?.getOrElse(emptyList())
-            }.orEmpty()
-            specsToFilters(localSpecs + themeSpecs, defaultHost)
-        }
 
         val manifestTask = tasks.register<GenerateExtensionManifestTask>("generateExtensionManifest") {
             this.filters.set(deeplinksProvider)
+            this.extensionName.set(
+                keiyoushi.name.map { name ->
+                    assertWithoutFlag(name.all { it.code < 0x180 }) { "Extension name should be romanized" }
+                    name
+                },
+            )
+            this.className.set(classNameProvider)
+            this.contentWarning.set(keiyoushi.contentWarning)
+            this.extensionLib.set(keiyoushi.libVersion)
+            this.torrent.set(keiyoushi.torrent.orElse(false))
         }
 
         androidComponents {
@@ -175,7 +173,7 @@ class PluginExtension : Plugin<Project> {
                 if (keepRules != null) {
                     val task = tasks.register<GenerateKeepRulesTask>("generate${variantName}KeepRules") {
                         this.applicationId.set(variant.applicationId)
-                        this.extClass.set(extClassProvider)
+                        this.className.set(classNameProvider)
                     }
                     keepRules.addGeneratedSourceDirectory(task) { it.outputDir }
                 }
@@ -188,13 +186,6 @@ class PluginExtension : Plugin<Project> {
                     output.versionName.set(versionNameProvider)
                 }
 
-                variant.manifestPlaceholders.put("appName", appNameProvider)
-                variant.manifestPlaceholders.put("tachiyomix.name", keiyoushi.name)
-                variant.manifestPlaceholders.put("extClass", extClassProvider)
-                variant.manifestPlaceholders.put("nsfw", nsfwProvider)
-                variant.manifestPlaceholders.put("torrent", torrentProvider)
-                variant.manifestPlaceholders.put("tachiyomix.contentWarning", contentWarningProvider)
-                variant.manifestPlaceholders.put("tachiyomix.extensionLib", keiyoushi.libVersion)
             }
         }
 
@@ -202,20 +193,13 @@ class PluginExtension : Plugin<Project> {
             archivesName.set(versionNameProvider.map { "aniyomi-$applicationIdSuffix-v$it" })
         }
 
+        dependencies {
+            addProvider("implementation", keiyoushi.theme.map { project(":lib-multisrc:$it") })
+            implementation(project(":core"))
+            compileOnly(libs.bundles.common)
+        }
+
         afterEvaluate {
-            val themeName = keiyoushi.theme.orNull
-            if (themeName != null) {
-                evaluationDependsOn(":lib-multisrc:$themeName")
-            }
-
-            dependencies {
-                if (themeName != null) {
-                    implementation(project(":lib-multisrc:$themeName"))
-                }
-                implementation(project(":core"))
-                compileOnly(libs.bundles.common)
-            }
-
             tasks.withType<PackageAndroidArtifact>().configureEach {
                 createdBy.set("")
                 doFirst {
