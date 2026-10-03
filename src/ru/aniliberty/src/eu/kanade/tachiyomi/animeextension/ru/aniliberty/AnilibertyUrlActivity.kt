@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.ru.anilibria
+package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -11,7 +11,7 @@ import kotlin.system.exitProcess
  * Springboard that accepts https://anilibria.tv/release/<item> intents
  * and redirects them to the main Aniyomi process.
  */
-class AnilibriaUrlActivity : Activity() {
+class AnilibertyUrlActivity : Activity() {
 
     private val tag = "searchAnimeRequest"
 
@@ -22,7 +22,7 @@ class AnilibriaUrlActivity : Activity() {
             val item = pathSegments[1]
             val mainIntent = Intent().apply {
                 action = "eu.kanade.tachiyomi.ANIMESEARCH"
-                putExtra("query", "${AniLibria.PREFIX_SEARCH}$item")
+                putExtra("query", "${AniLiberty.PREFIX_SEARCH}$item")
                 putExtra("filter", packageName)
             }
 

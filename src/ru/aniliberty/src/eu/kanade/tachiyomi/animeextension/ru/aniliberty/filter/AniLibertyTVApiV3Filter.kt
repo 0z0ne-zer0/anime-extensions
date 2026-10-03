@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.ru.anilibria.filter
+package eu.kanade.tachiyomi.animeextension.ru.aniliberty.filter
 
 import android.util.Log
 import eu.kanade.tachiyomi.animeextension.ru.anilibria.dto.TeamFilter
@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 
-class AniLibriaTVApiV3Filter(
+class AniLibertyTVApiV3Filter(
     private val baseUrl: String,
     private val client: OkHttpClient,
     private val apiHeaders: Headers,
@@ -19,7 +19,7 @@ class AniLibriaTVApiV3Filter(
     private val json = Json { ignoreUnknownKeys = true }
 
     open class TriStateFilterList(name: String, val vals: Array<String>) :
-        AnimeFilter.Group<TriState>(name, vals.map(AniLibriaTVApiV3Filter::TriStateVal))
+        AnimeFilter.Group<TriState>(name, vals.map(AniLibertyTVApiV3Filter::TriStateVal))
     private class TriStateVal(name: String) : TriState(name)
 
     open class CheckBoxFilterList(name: String, val pairs: Array<Pair<String, String>>) :

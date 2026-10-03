@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.ru.anilibria.filter
+package eu.kanade.tachiyomi.animeextension.ru.aniliberty.filter
 
 import eu.kanade.tachiyomi.network.GET
 import okhttp3.Headers

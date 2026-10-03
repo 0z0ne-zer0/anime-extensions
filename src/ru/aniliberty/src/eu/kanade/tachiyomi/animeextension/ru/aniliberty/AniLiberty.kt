@@ -1,13 +1,13 @@
-package eu.kanade.tachiyomi.animeextension.ru.anilibria
+package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
 import android.app.Application
 import android.util.Log
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.animeextension.ru.anilibria.dto.FilteredEpisodeList
-import eu.kanade.tachiyomi.animeextension.ru.anilibria.dto.SingleTitle
-import eu.kanade.tachiyomi.animeextension.ru.anilibria.dto.TitleList
-import eu.kanade.tachiyomi.animeextension.ru.anilibria.filter.AniLibriaTVApiV3Filter
+import eu.kanade.tachiyomi.animeextension.ru.aniliberty.dto.FilteredEpisodeList
+import eu.kanade.tachiyomi.animeextension.ru.aniliberty.dto.SingleTitle
+import eu.kanade.tachiyomi.animeextension.ru.aniliberty.dto.TitleList
+import eu.kanade.tachiyomi.animeextension.ru.aniliberty.filter.AniLibertyTVApiV3Filter
 import eu.kanade.tachiyomi.animesource.ConfigurableAnimeSource
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.AnimesPage
@@ -26,7 +26,7 @@ import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class AniLibria : ConfigurableAnimeSource, AnimeHttpSource() {
+class AniLiberty : ConfigurableAnimeSource, AnimeHttpSource() {
 
     override val name: String = "AnilibriaTV"
 
@@ -248,7 +248,7 @@ class AniLibria : ConfigurableAnimeSource, AnimeHttpSource() {
 
     // ============================== Search ===============================
 
-    private val customFilters = AniLibriaTVApiV3Filter(apiUrl, client, apiHeaders)
+    private val customFilters = AniLibertyTVApiV3Filter(apiUrl, client, apiHeaders)
 
     override fun getFilterList() = customFilters.getFilterList()
 

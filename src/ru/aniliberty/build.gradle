@@ -1,6 +1,6 @@
 ext {
-    extName = 'AniLibria'
-    extClass = '.AniLibria'
+    extName = 'AniLiberty'
+    extClass = '.AniLiberty'
     extVersionCode = 3
     isNSFW = false
 }
