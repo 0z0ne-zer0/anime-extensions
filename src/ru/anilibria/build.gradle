@@ -1,0 +1,8 @@
+ext {
+    extName = 'AniLibria'
+    extClass = '.AniLibria'
+    extVersionCode = 3
+    isNSFW = false
+}
+
+apply plugin: "kei.plugins.extension.legacy"
