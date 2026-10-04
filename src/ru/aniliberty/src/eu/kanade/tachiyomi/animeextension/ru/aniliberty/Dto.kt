@@ -13,7 +13,7 @@ class ReleaseData(
     val season: ReleaseSeason,
     val poster: ReleasePoster,
     @SerialName("is_ongoing") val isOngoing: Boolean,
-    val description: String,
+    val description: String? = null,
     val notification: String? = null,
     @SerialName("external_player") val externalPlayer: String? = null,
     @SerialName("is_in_production") val isInProduction: Boolean = false,
@@ -60,7 +60,7 @@ class ReleaseData(
         builder.append("Ceзон: ${season.description ?: ""} $year\n")
         builder.append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
 
-        if (builder.isNotEmpty()) {
+        if (description != null) {
             builder.append(description)
         }
 
