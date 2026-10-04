@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
-import android.app.Application
 import android.icu.text.DecimalFormat
 import android.icu.text.DecimalFormatSymbols
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.animesource.ConfigurableAnimeSource
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.AnimesPage
 import eu.kanade.tachiyomi.animesource.model.Hoster
@@ -21,14 +18,10 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.Response
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import java.time.Instant
 import java.util.Locale
 
-class AniLiberty :
-    AnimeHttpSource(),
-    ConfigurableAnimeSource {
+class AniLiberty : AnimeHttpSource() {
 
     override val name: String = "AniLiberty"
 
@@ -47,22 +40,6 @@ class AniLiberty :
     private val searchFilter: String = "id,alias,name,poster,description,genres"
     private val animeDetailsFilter: String = "year,season,is_ongoing,description,notification,is_in_production,is_blocked_by_geo,is_blocked_by_copyrights,genres"
     private val episodesFilter: String = "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview,episodes.updated_at"
-
-    private val preferences by lazy {
-        Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
-    }
-
-    companion object {
-        private const val PREF_QUALITY_KEY = "preferred_quality"
-        private const val PREF_QUALITY_TITLE = "Качество по умолчанию"
-        private const val PREF_QUALITY_DEFAULT = "480p"
-        private val PREF_QUALITY_ENTRIES = arrayOf("1080p", "720p", "480p")
-        private val PREF_QUALITY_VALUES by lazy {
-            PREF_QUALITY_ENTRIES.map { it.substringBefore("p") }.toTypedArray()
-        }
-
-        const val PREFIX_SEARCH = "prefix_path:"
-    }
 
     // ============================== Popular ==============================
 
@@ -215,7 +192,7 @@ class AniLiberty :
 
         val episodes = client.get(epsUrl, apiHeaders).parseAs<EpisodeList>().episodes.sortedByDescending { it.sortOrder }
 
-        return episodes.orEmpty().map { ep ->
+        return episodes.map { ep ->
             SEpisode.create().apply {
                 episode_number = ep.sortOrder.toFloat()
                 name = ep.name ?: "Эпизод ${ep.ordinal.let {
@@ -264,10 +241,6 @@ class AniLiberty :
             Video(videoUrl = videos.mqStream, videoTitle = "720p", resolution = 720),
             Video(videoUrl = videos.lqStream, videoTitle = "480p", resolution = 480),
         )
-    }
-
-    override fun setupPreferenceScreen(screen: PreferenceScreen) {
-        TODO("Not yet implemented")
     }
 
     // ============================= Utilities ==============================
