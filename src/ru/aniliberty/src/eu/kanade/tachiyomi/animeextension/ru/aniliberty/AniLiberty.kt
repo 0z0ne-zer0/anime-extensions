@@ -40,7 +40,7 @@ class AniLiberty :
 
     override val supportsLatest: Boolean = true
 
-    private val apiHeaders: Headers =  super.headersBuilder()
+    private val apiHeaders: Headers = super.headersBuilder()
         .add("Accept", "application/json")
         .build()
 
