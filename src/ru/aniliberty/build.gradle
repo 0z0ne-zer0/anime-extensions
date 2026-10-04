@@ -1,7 +1,7 @@
 ext {
     extName = 'AniLiberty'
     extClass = '.AniLiberty'
-    extVersionCode = 3
+    extVersionCode = 4
     isNSFW = false
 }
 
