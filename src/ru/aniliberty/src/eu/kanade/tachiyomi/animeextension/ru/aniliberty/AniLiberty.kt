@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
 import android.app.Application
+import android.icu.text.DecimalFormat
+import android.icu.text.DecimalFormatSymbols
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -20,6 +22,7 @@ import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 class AniLiberty :
     AnimeHttpSource(),
@@ -184,15 +187,65 @@ class AniLiberty :
 
     // =========================== Anime Details ============================
 
-    override fun getAnimeUrl(anime: SAnime): String = "$baseUrl/anime/releases/release/${ anime.url }"
+    private val detailsUrl = "${baseUrl}anime/releases/release"
+    override fun getAnimeUrl(anime: SAnime): String = "$detailsUrl/${ anime.url }"
 
-    override fun animeDetailsParse(response: Response): SAnime {
-        TODO("Not yet implemented")
+    override suspend fun getAnimeDetails(anime: SAnime): SAnime {
+        val url = "$apiUrl/anime/releases/${anime.url}".toHttpUrl().newBuilder().apply {
+            addQueryParameter("include", "year,season,is_ongoing,description,notification,is_in_production,is_blocked_by_geo,is_blocked_by_copyrights,genres")
+        }.build()
+        val show = client.get(url = url, headers = apiHeaders).parseAs<ReleaseData>()
+
+        return anime.apply {
+            genre = show.genres.joinToString()
+            status = if (show.isOngoing) SAnime.ONGOING else SAnime.COMPLETED
+            description = show.descriptionBuilder()
+        }
     }
 
-    override fun episodeListParse(response: Response): List<SEpisode> {
-        TODO("Not yet implemented")
+    override fun animeDetailsParse(response: Response): SAnime = throw UnsupportedOperationException()
+
+    // ============================== Episodes ==============================
+
+    override fun getEpisodeUrl(episode: SEpisode): String {
+        Log.d("AniLiberty", "Episode URL: ${episode.url}")
+        return episode.url
     }
+
+    override suspend fun getEpisodeList(anime: SAnime): List<SEpisode> {
+        val epsUrl = "$apiUrl/anime/releases/${anime.url}".toHttpUrl().newBuilder().apply {
+            addQueryParameter("include", "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview")
+        }.build()
+
+        val episodes = client.get(epsUrl, apiHeaders).parseAs<EpisodeList>().episodes
+
+        return episodes.orEmpty().map { ep ->
+            SEpisode.create().apply {
+                episode_number = ep.sortOrder.toFloat()
+                name = ep.name ?: "Эпизод ${ep.ordinal.let {
+                    val symbols = DecimalFormatSymbols(Locale.ENGLISH)
+                    val formatter = DecimalFormat("#.###", symbols)
+                    formatter.format(it)
+                }}"
+                url = "$apiUrl/anime/releases/episodes/${ep.id}"
+                preview_url = ep.preview.let {
+                    if (it.src != null) {
+                        "$baseUrl/${it.src.slice(1 until it.src.length)}"
+                    } else if (it.preview != null) {
+                        "$baseUrl/${it.preview.slice(1 until it.preview.length)}"
+                    } else if (it.thumbnail != null) {
+                        "$baseUrl/${it.thumbnail.slice(1 until it.thumbnail.length)}"
+                    } else {
+                        ""
+                    }
+                }
+            }
+        }
+    }
+
+    override fun episodeListParse(response: Response): List<SEpisode> = throw UnsupportedOperationException()
+
+    // ============================== Hosters ===============================
 
     override fun seasonListParse(response: Response): List<SAnime> {
         TODO("Not yet implemented")
@@ -213,11 +266,11 @@ class AniLiberty :
         title = name.russian
         thumbnail_url = poster.let {
             if (it.src != null) {
-                "$baseUrl/${it.src}"
+                "$baseUrl/${it.src.slice(1 until it.src.length)}"
             } else if (it.preview != null) {
-                "$baseUrl/${it.preview}"
+                "$baseUrl/${it.preview.slice(1 until it.preview.length)}"
             } else if (it.thumbnail != null) {
-                "$baseUrl/${it.thumbnail}"
+                "$baseUrl/${it.thumbnail.slice(1 until it.thumbnail.length)}"
             } else {
                 ""
             }

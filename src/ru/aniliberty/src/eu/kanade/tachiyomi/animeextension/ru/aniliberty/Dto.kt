@@ -26,13 +26,30 @@ class SearchReleaseData(
 }
 
 @Serializable
+class SearchResult(
+    val data: List<SearchReleaseData>,
+    val meta: SearchMeta,
+) {
+
+    @Serializable
+    class SearchMeta(
+        val pagination: SearchPagination,
+    ) {
+        @Serializable
+        class SearchPagination(
+            @SerialName("current_page") val currentPage: Int,
+            @SerialName("total_pages") val totalPages: Int,
+        )
+    }
+}
+
+@Serializable
 class ReleaseData(
     val year: Int,
     val season: ReleaseSeason,
     @SerialName("is_ongoing") val isOngoing: Boolean,
     val description: String? = null,
     val notification: String? = null,
-    @SerialName("external_player") val externalPlayer: String? = null,
     @SerialName("is_in_production") val isInProduction: Boolean = false,
     @SerialName("is_blocked_by_geo") val isBlockedByGeo: Boolean = false,
     @SerialName("is_blocked_by_copyrights") val isBlockedByCopyright: Boolean = false,
@@ -51,19 +68,22 @@ class ReleaseData(
 }
 
 @Serializable
-class SearchResult(
-    val data: List<SearchReleaseData>,
-    val meta: SearchMeta,
+class EpisodeList(
+    val episodes: List<EpisodeData>,
 ) {
-
     @Serializable
-    class SearchMeta(
-        val pagination: SearchPagination,
+    class EpisodeData(
+        val id: String,
+        val name: String? = null,
+        val ordinal: Float,
+        @SerialName("sort_order") val sortOrder: Int,
+        val preview: EpisodePreview,
     ) {
         @Serializable
-        class SearchPagination(
-            @SerialName("current_page") val currentPage: Int,
-            @SerialName("total_pages") val totalPages: Int,
+        class EpisodePreview(
+            val src: String? = null,
+            val preview: String? = null,
+            val thumbnail: String? = null,
         )
     }
 }
