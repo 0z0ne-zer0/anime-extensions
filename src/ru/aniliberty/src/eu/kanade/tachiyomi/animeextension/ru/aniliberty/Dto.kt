@@ -88,6 +88,7 @@ class EpisodeList(
         val ordinal: Float,
         @SerialName("sort_order") val sortOrder: Int,
         val preview: EpisodePreview,
+        @SerialName("updated_at") val updatedAt: String,
     ) {
         @Serializable
         class EpisodePreview(

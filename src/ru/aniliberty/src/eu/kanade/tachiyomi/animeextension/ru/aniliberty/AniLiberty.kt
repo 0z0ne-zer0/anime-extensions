@@ -22,6 +22,7 @@ import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.time.Instant
 import java.util.Locale
 
 class AniLiberty :
@@ -208,17 +209,13 @@ class AniLiberty :
 
     // ============================== Episodes ==============================
 
-    override fun getEpisodeUrl(episode: SEpisode): String {
-        Log.d("AniLiberty", "Episode URL: ${episode.url}")
-        return episode.url
-    }
-
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getEpisodeList(anime: SAnime): List<SEpisode> {
         val epsUrl = "$apiUrl/anime/releases/${anime.url}".toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview")
+            addQueryParameter("include", "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview,episodes.updated_at")
         }.build()
 
-        val episodes = client.get(epsUrl, apiHeaders).parseAs<EpisodeList>().episodes
+        val episodes = client.get(epsUrl, apiHeaders).parseAs<EpisodeList>().episodes.sortedByDescending { it.sortOrder }
 
         return episodes.orEmpty().map { ep ->
             SEpisode.create().apply {
@@ -228,6 +225,7 @@ class AniLiberty :
                     val formatter = DecimalFormat("#.###", symbols)
                     formatter.format(it)
                 }}"
+                date_upload = Instant.parse(ep.updatedAt).toEpochMilli()
                 url = "$apiUrl/anime/releases/episodes/${ep.id}"
                 preview_url = ep.preview.let {
                     if (it.src != null) {
