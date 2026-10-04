@@ -119,7 +119,10 @@ class AniLiberty :
             filters.forEach { filter ->
                 when (filter) {
                     is Filters.SortFilter -> addQueryParameter("f[sorting]", filter.getValue())
-                    is Filters.TypeFilter -> addQueryParameter("f[types]", filter.getValue())
+                    is Filters.TypeFilter -> {
+                        val types = filter.getSelectedValues()
+                        if (types.isNotEmpty()) addQueryParameter("f[types]", types)
+                    }
                     else -> {}
                 }
             }

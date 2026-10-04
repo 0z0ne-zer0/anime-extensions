@@ -5,12 +5,20 @@ import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 
 object Filters {
 
-    class TypeFilter : AnimeFilter.Select<String>("Тип", TYPE_ENTRIES.toTypedArray(), 0) {
-        fun getValue() = TYPE_VALUES[state]
-
+    class TypeFilterCheckbox(name: String, val value: String) : AnimeFilter.CheckBox(name, false)
+    class TypeFilter : AnimeFilter.Group<TypeFilterCheckbox>("Тип", TYPE_MAP.map { TypeFilterCheckbox(it.first, it.second) }) {
+        fun getSelectedValues(): String = state.filter { it.state }.joinToString(",") { it.value }
         companion object {
-            private val TYPE_ENTRIES = listOf("ТВ", "ONA", "WEB", "OVA", "OAD", "Фильм", "Дорама", "Спешл")
-            private val TYPE_VALUES = listOf("TV", "ONA", "WEB", "OVA", "OAD", "MOVIE", "DORAMA", "SPECIAL")
+            private val TYPE_MAP = listOf(
+                Pair("ТВ", "TV"),
+                Pair("ONA", "ONA"),
+                Pair("WEB", "WEB"),
+                Pair("OVA", "OVA"),
+                Pair("OAD", "OAD"),
+                Pair("Фильм", "MOVIE"),
+                Pair("Дорама", "DORAMA"),
+                Pair("Спешл", "SPECIAL"),
+            )
         }
     }
 
