@@ -67,6 +67,7 @@ class AniLiberty :
     override suspend fun getPopularAnime(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "RATING_DESC")
+            addQueryParameter("include", "id,alias,name,poster")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -74,7 +75,7 @@ class AniLiberty :
 
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
         Log.d("AniLiberty", "Response data: ${dto.data.joinToString("; "){ it.name.russian }}")
-        val animes = dto.data.mapNotNull { it.toSAnime() }
+        val animes = dto.data.map { it.toSAnime() }
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
         return AnimesPage(animes, hasNextPage)
@@ -88,6 +89,7 @@ class AniLiberty :
     override suspend fun getLatestUpdates(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "FRESH_AT_DESC")
+            addQueryParameter("include", "id,alias,name,poster")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -113,6 +115,7 @@ class AniLiberty :
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
+            addQueryParameter("include", "id,alias,name,poster")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
 
@@ -165,6 +168,7 @@ class AniLiberty :
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
         Log.d("AniLiberty", "Response data: ${dto.data.joinToString("; "){ it.name.russian }}")
         val animes = dto.data.map { it.toSAnime() }
+        Log.d("AniLiberty", "Test URL: ${animes.joinToString { it.url }}")
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
         return AnimesPage(animes, hasNextPage)
@@ -204,7 +208,7 @@ class AniLiberty :
 
     // ============================= Utilities ==============================
 
-    private fun ReleaseData.toSAnime(): SAnime = SAnime.create().apply {
+    private fun SearchReleaseData.toSAnime(): SAnime = SAnime.create().apply {
         url = alias.ifBlank { id.toString() }
         title = name.russian
         thumbnail_url = poster.let {
@@ -218,29 +222,23 @@ class AniLiberty :
                 ""
             }
         }
-        description = descriptionBuilder()
-        genre = genres.joinToString(", ") { it.name }
-        status = if (isOngoing) SAnime.ONGOING else SAnime.COMPLETED
     }
 
-    private fun ReleaseData.descriptionBuilder(): String {
-        val builder = StringBuilder()
+    private fun ReleaseData.descriptionBuilder(): String = buildString {
         if (isBlockedByGeo) {
-            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С РЕГИОНАЛЬНЫМИ ОГРАНИЧЕНИЯМИ🛑\n")
+            append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С РЕГИОНАЛЬНЫМИ ОГРАНИЧЕНИЯМИ🛑\n")
         }
         if (isBlockedByCopyright) {
-            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С КОПИРАЙТАМИ 🛑\n")
+            append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С КОПИРАЙТАМИ 🛑\n")
         }
         if (notification != null) {
-            builder.append("🛑 $notification 🛑\n")
+            append("🛑 $notification 🛑\n")
         }
-        builder.append("Ceзон: ${season.description ?: ""} $year\n")
-        builder.append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
+        append("Ceзон: ${season.description ?: ""} $year\n")
+        append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
 
         if (description != null) {
-            builder.append(description)
+            append(description)
         }
-
-        return builder.toString()
     }
 }

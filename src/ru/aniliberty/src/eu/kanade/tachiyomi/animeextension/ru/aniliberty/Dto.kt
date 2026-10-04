@@ -4,13 +4,31 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ReleaseData(
+class SearchReleaseData(
     val id: Int,
     val alias: String = "",
     val name: ReleaseName,
+    val poster: ReleasePoster,
+) {
+    @Serializable
+    class ReleaseName(
+        @SerialName("main") val russian: String,
+        val english: String,
+        val alternative: String? = null,
+    )
+
+    @Serializable
+    class ReleasePoster(
+        val src: String? = null,
+        val preview: String? = null,
+        val thumbnail: String? = null,
+    )
+}
+
+@Serializable
+class ReleaseData(
     val year: Int,
     val season: ReleaseSeason,
-    val poster: ReleasePoster,
     @SerialName("is_ongoing") val isOngoing: Boolean,
     val description: String? = null,
     val notification: String? = null,
@@ -20,24 +38,9 @@ class ReleaseData(
     @SerialName("is_blocked_by_copyrights") val isBlockedByCopyright: Boolean = false,
     val genres: List<ReleaseGenre>,
 ) {
-
-    @Serializable
-    class ReleaseName(
-        @SerialName("main") val russian: String,
-        val english: String,
-        val alternative: String? = null,
-    )
-
     @Serializable
     class ReleaseSeason(
         val description: String? = null,
-    )
-
-    @Serializable
-    class ReleasePoster(
-        val src: String? = null,
-        val preview: String? = null,
-        val thumbnail: String? = null,
     )
 
     @Serializable
@@ -49,7 +52,7 @@ class ReleaseData(
 
 @Serializable
 class SearchResult(
-    val data: List<ReleaseData>,
+    val data: List<SearchReleaseData>,
     val meta: SearchMeta,
 ) {
 
