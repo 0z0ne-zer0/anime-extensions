@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ReleaseData(
     val id: Int,
-    val alias: String,
+    val alias: String = "",
     val name: ReleaseName,
     val year: Int,
     val season: ReleaseSeason,
@@ -67,8 +67,8 @@ class ReleaseData(
         return builder.toString()
     }
 
-    fun toSAnime(): SAnime? = SAnime.create().apply {
-        url = alias
+    fun toSAnime(): SAnime = SAnime.create().apply {
+        url = alias.ifBlank { id.toString() }
         title = name.russian
         thumbnail_url = poster.thumbnail
         description = descriptionBuilder()
