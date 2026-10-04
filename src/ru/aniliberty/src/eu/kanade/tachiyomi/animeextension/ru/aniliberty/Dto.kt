@@ -57,7 +57,7 @@ class ReleaseData(
         if (notification != null) {
             builder.append("🛑 $notification 🛑\n")
         }
-        builder.append("Ceзон: ${season.description} $year\n")
+        builder.append("Ceзон: ${season.description ?: ""} $year\n")
         builder.append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
 
         if (builder.isNotEmpty()) {
