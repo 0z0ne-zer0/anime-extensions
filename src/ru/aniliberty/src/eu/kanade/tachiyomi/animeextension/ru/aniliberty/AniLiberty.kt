@@ -68,9 +68,10 @@ class AniLiberty :
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
+        Log.d("AniLiberty", "URL: $url")
 
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
-        Log.d("AniLiberty", dto.data.joinToString { it.name.russian })
+        Log.d("AniLiberty", "Response data: ${dto.data.joinToString("; "){ it.name.russian }}")
         val animes = dto.data.mapNotNull { it.toSAnime() }
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
@@ -88,9 +89,10 @@ class AniLiberty :
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
+        Log.d("AniLiberty", "URL: $url")
 
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
-        Log.d("AniLiberty", dto.data.joinToString { it.name.russian })
+        Log.d("AniLiberty", "Response data: ${dto.data.joinToString("; "){ it.name.russian }}")
         val animes = dto.data.map { it.toSAnime() }
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
@@ -122,9 +124,10 @@ class AniLiberty :
                 }
             }
         }.build()
+        Log.d("AniLiberty", "URL: $url")
 
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
-        Log.d("AniLiberty", dto.data.joinToString { it.name.russian })
+        Log.d("AniLiberty", "Response data: ${dto.data.joinToString("; "){ it.name.russian }}")
         val animes = dto.data.map { it.toSAnime() }
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
