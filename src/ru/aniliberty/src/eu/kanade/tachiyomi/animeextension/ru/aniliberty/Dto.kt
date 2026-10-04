@@ -9,6 +9,8 @@ class SearchReleaseData(
     val alias: String = "",
     val name: ReleaseName,
     val poster: ReleasePoster,
+    @SerialName("description") val animeDescription: String? = null,
+    val genres: List<ReleaseGenre>,
 ) {
     @Serializable
     class ReleaseName(
@@ -23,6 +25,14 @@ class SearchReleaseData(
         val preview: String? = null,
         val thumbnail: String? = null,
     )
+
+    @Serializable
+    class ReleaseGenre(
+        val id: Int,
+        val name: String,
+    ) {
+        override fun toString(): String = name
+    }
 }
 
 @Serializable

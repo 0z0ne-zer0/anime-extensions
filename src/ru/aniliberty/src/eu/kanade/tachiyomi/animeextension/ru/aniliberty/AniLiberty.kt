@@ -70,7 +70,7 @@ class AniLiberty :
     override suspend fun getPopularAnime(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "RATING_DESC")
-            addQueryParameter("include", "id,alias,name,poster")
+            addQueryParameter("include", "id,alias,name,poster,description,genres")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -92,7 +92,7 @@ class AniLiberty :
     override suspend fun getLatestUpdates(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "FRESH_AT_DESC")
-            addQueryParameter("include", "id,alias,name,poster")
+            addQueryParameter("include", "id,alias,name,poster,description,genres")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -118,7 +118,7 @@ class AniLiberty :
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "id,alias,name,poster")
+            addQueryParameter("include", "id,alias,name,poster,description,genres")
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
 
@@ -275,6 +275,8 @@ class AniLiberty :
                 ""
             }
         }
+        description = animeDescription
+        genre = genres.joinToString { it.name }
     }
 
     private fun ReleaseData.descriptionBuilder(): String = buildString {
