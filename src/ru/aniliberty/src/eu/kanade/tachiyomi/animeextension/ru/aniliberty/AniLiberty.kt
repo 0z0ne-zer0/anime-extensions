@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
 import android.app.Application
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.animesource.ConfigurableAnimeSource
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
@@ -105,8 +107,10 @@ class AniLiberty :
 
     // =============================== Search ===============================
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun getFilterList(): AnimeFilterList = Filters.FILTER_LIST
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("limit", 20.toString())
@@ -122,6 +126,35 @@ class AniLiberty :
                     is Filters.TypeFilter -> {
                         val types = filter.getSelectedValues()
                         if (types.isNotEmpty()) addQueryParameter("f[types]", types)
+                    }
+                    is Filters.GenreFilter -> {
+                        val genres = filter.getSelectedValues()
+                        if (genres.isNotEmpty()) addQueryParameter("f[genres]", genres)
+                    }
+                    is Filters.SeasonFilter -> {
+                        val seasons = filter.getSelectedValues()
+                        if (seasons.isNotEmpty()) addQueryParameter("f[seasons]", seasons)
+                    }
+                    is Filters.YearFilter -> {
+                        addQueryParameter("f[years][from_year]", filter.getValue())
+                        addQueryParameter("f[years][to_year]", filter.getValue())
+                    }
+                    is Filters.AgeRatingFilter -> addQueryParameter("f[age_ratings]", filter.getValue())
+                    is Filters.OngoingFilter -> {
+                        if (filter.state == 1) {
+                            addQueryParameter("f[publish_statuses]", "IS_ONGOING")
+                        }
+                        if (filter.state == 2) {
+                            addQueryParameter("f[publish_statuses]", "IS_NOT_ONGOING")
+                        }
+                    }
+                    is Filters.ProductionFilter -> {
+                        if (filter.state == 1) {
+                            addQueryParameter("f[production_statuses]", "IS_IN_PRODUCTION")
+                        }
+                        if (filter.state == 2) {
+                            addQueryParameter("f[production_statuses]", "IS_NOT_IN_PRODUCTION")
+                        }
                     }
                     else -> {}
                 }
@@ -146,6 +179,8 @@ class AniLiberty :
     override fun searchAnimeParse(response: Response): AnimesPage = throw UnsupportedOperationException()
 
     // =========================== Anime Details ============================
+
+    override fun getAnimeUrl(anime: SAnime): String = "$baseUrl/anime/releases/release/${ anime.url }"
 
     override fun animeDetailsParse(response: Response): SAnime {
         TODO("Not yet implemented")
