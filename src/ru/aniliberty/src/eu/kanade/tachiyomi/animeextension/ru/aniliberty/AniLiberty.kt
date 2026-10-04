@@ -166,4 +166,46 @@ class AniLiberty :
     override fun setupPreferenceScreen(screen: PreferenceScreen) {
         TODO("Not yet implemented")
     }
+
+    // ============================= Utilities ==============================
+
+    private fun ReleaseData.toSAnime(): SAnime = SAnime.create().apply {
+        url = alias.ifBlank { id.toString() }
+        title = name.russian
+        thumbnail_url = poster.let {
+            if (it.src != null) {
+                "$baseUrl/${it.src}"
+            } else if (it.preview != null) {
+                "$baseUrl/${it.preview}"
+            } else if (it.thumbnail != null) {
+                "$baseUrl/${it.thumbnail}"
+            } else {
+                ""
+            }
+        }
+        description = descriptionBuilder()
+        genre = genres.joinToString(", ") { it.name }
+        status = if (isOngoing) SAnime.ONGOING else SAnime.COMPLETED
+    }
+
+    private fun ReleaseData.descriptionBuilder(): String {
+        val builder = StringBuilder()
+        if (isBlockedByGeo) {
+            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С РЕГИОНАЛЬНЫМИ ОГРАНИЧЕНИЯМИ🛑\n")
+        }
+        if (isBlockedByCopyright) {
+            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С КОПИРАЙТАМИ 🛑\n")
+        }
+        if (notification != null) {
+            builder.append("🛑 $notification 🛑\n")
+        }
+        builder.append("Ceзон: ${season.description ?: ""} $year\n")
+        builder.append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
+
+        if (description != null) {
+            builder.append(description)
+        }
+
+        return builder.toString()
+    }
 }

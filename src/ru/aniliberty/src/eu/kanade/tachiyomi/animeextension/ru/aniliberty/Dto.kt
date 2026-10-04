@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.animeextension.ru.aniliberty
 
-import eu.kanade.tachiyomi.animesource.model.SAnime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -36,8 +35,9 @@ class ReleaseData(
 
     @Serializable
     class ReleasePoster(
-        val preview: String,
-        val thumbnail: String,
+        val src: String? = null,
+        val preview: String? = null,
+        val thumbnail: String? = null,
     )
 
     @Serializable
@@ -45,36 +45,6 @@ class ReleaseData(
         val id: Int,
         val name: String,
     )
-
-    private fun descriptionBuilder(): String {
-        val builder = StringBuilder()
-        if (isBlockedByGeo) {
-            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С РЕГИОНАЛЬНЫМИ ОГРАНИЧЕНИЯМИ🛑\n")
-        }
-        if (isBlockedByCopyright) {
-            builder.append("🛑 ДАННОЕ АНИМЕ ЗАБЛОКИРОВАНО В СВЯЗИ С КОПИРАЙТАМИ 🛑\n")
-        }
-        if (notification != null) {
-            builder.append("🛑 $notification 🛑\n")
-        }
-        builder.append("Ceзон: ${season.description ?: ""} $year\n")
-        builder.append("Статус озвучки: ${if (isInProduction) "В процессе" else "Завершен"}\n")
-
-        if (description != null) {
-            builder.append(description)
-        }
-
-        return builder.toString()
-    }
-
-    fun toSAnime(): SAnime = SAnime.create().apply {
-        url = alias.ifBlank { id.toString() }
-        title = name.russian
-        thumbnail_url = poster.thumbnail
-        description = descriptionBuilder()
-        genre = genres.joinToString(", ") { it.name }
-        status = if (isOngoing) SAnime.ONGOING else SAnime.COMPLETED
-    }
 }
 
 @Serializable
