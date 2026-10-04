@@ -196,7 +196,8 @@ class AniLiberty :
         }.build()
         val show = client.get(url = url, headers = apiHeaders).parseAs<ReleaseData>()
 
-        return anime.apply {
+        return SAnime.create().apply {
+            initialized = true
             genre = show.genres.joinToString()
             status = if (show.isOngoing) SAnime.ONGOING else SAnime.COMPLETED
             description = show.descriptionBuilder()
