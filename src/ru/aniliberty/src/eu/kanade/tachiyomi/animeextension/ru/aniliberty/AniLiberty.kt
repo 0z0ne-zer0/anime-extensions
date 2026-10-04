@@ -187,7 +187,7 @@ class AniLiberty :
 
     // =========================== Anime Details ============================
 
-    private val detailsUrl = "${baseUrl}anime/releases/release"
+    private val detailsUrl = "$baseUrl/anime/releases/release"
     override fun getAnimeUrl(anime: SAnime): String = "$detailsUrl/${ anime.url }"
 
     override suspend fun getAnimeDetails(anime: SAnime): SAnime {
