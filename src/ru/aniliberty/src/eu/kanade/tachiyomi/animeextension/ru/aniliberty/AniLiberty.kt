@@ -91,7 +91,7 @@ class AniLiberty :
 
         val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
         Log.d("AniLiberty", dto.data.joinToString { it.name.russian })
-        val animes = dto.data.mapNotNull { it.toSAnime() }
+        val animes = dto.data.map { it.toSAnime() }
         val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
 
         return AnimesPage(animes, hasNextPage)
@@ -103,8 +103,32 @@ class AniLiberty :
 
     // =============================== Search ===============================
 
+    override fun getFilterList(): AnimeFilterList = Filters.FILTER_LIST
+
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
-        return super.getSearchAnime(page, query, filters)
+        val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
+            addQueryParameter("limit", 20.toString())
+            addQueryParameter("page", page.toString())
+
+            if (query.isNotBlank()) {
+                addQueryParameter("f[search]", query)
+            }
+
+            filters.forEach { filter ->
+                when (filter) {
+                    is Filters.SortFilter -> addQueryParameter("f[sorting]", filter.getValue())
+                    is Filters.TypeFilter -> addQueryParameter("f[types]", filter.getValue())
+                    else -> {}
+                }
+            }
+        }.build()
+
+        val dto = client.get(url = url, headers = apiHeaders).parseAs<SearchResult>()
+        Log.d("AniLiberty", dto.data.joinToString { it.name.russian })
+        val animes = dto.data.map { it.toSAnime() }
+        val hasNextPage = dto.meta.pagination.currentPage < dto.meta.pagination.totalPages
+
+        return AnimesPage(animes, hasNextPage)
     }
 
     override fun searchAnimeRequest(
