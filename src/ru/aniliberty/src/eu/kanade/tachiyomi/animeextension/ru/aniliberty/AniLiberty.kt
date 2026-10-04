@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.animesource.model.AnimesPage
 import eu.kanade.tachiyomi.animesource.model.Hoster
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
+import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import keiyoushi.network.get
 import keiyoushi.utils.parseAs
@@ -29,8 +30,6 @@ class AniLiberty :
     AnimeHttpSource(),
     ConfigurableAnimeSource {
 
-    private val userAgent by lazy { }
-
     override val name: String = "AniLiberty"
 
     override val baseUrl: String = "https://aniliberty.top"
@@ -41,14 +40,13 @@ class AniLiberty :
 
     override val supportsLatest: Boolean = true
 
-    private val apiHeaders: Headers = Headers.Builder()
+    private val apiHeaders: Headers =  super.headersBuilder()
         .add("Accept", "application/json")
-        .add("Charset", "UTF-8")
         .build()
 
-    private val defaultRemoveFilter: String = "torrents,player.rutube,names.alternative,type.full_string,season.week_day"
-
-    private val defaultSearchFilter: String = "names,posters,id"
+    private val searchFilter: String = "id,alias,name,poster,description,genres"
+    private val animeDetailsFilter: String = "year,season,is_ongoing,description,notification,is_in_production,is_blocked_by_geo,is_blocked_by_copyrights,genres"
+    private val episodesFilter: String = "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview,episodes.updated_at"
 
     private val preferences by lazy {
         Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
@@ -71,7 +69,7 @@ class AniLiberty :
     override suspend fun getPopularAnime(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "RATING_DESC")
-            addQueryParameter("include", "id,alias,name,poster,description,genres")
+            addQueryParameter("include", searchFilter)
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -93,7 +91,7 @@ class AniLiberty :
     override suspend fun getLatestUpdates(page: Int): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
             addQueryParameter("f[sorting]", "FRESH_AT_DESC")
-            addQueryParameter("include", "id,alias,name,poster,description,genres")
+            addQueryParameter("include", searchFilter)
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
         }.build()
@@ -119,7 +117,7 @@ class AniLiberty :
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
         val url = "$apiUrl/anime/catalog/releases".toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "id,alias,name,poster,description,genres")
+            addQueryParameter("include", searchFilter)
             addQueryParameter("limit", 20.toString())
             addQueryParameter("page", page.toString())
 
@@ -193,7 +191,7 @@ class AniLiberty :
 
     override suspend fun getAnimeDetails(anime: SAnime): SAnime {
         val url = "$apiUrl/anime/releases/${anime.url}".toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "year,season,is_ongoing,description,notification,is_in_production,is_blocked_by_geo,is_blocked_by_copyrights,genres")
+            addQueryParameter("include", animeDetailsFilter)
         }.build()
         val show = client.get(url = url, headers = apiHeaders).parseAs<ReleaseData>()
 
@@ -212,7 +210,7 @@ class AniLiberty :
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getEpisodeList(anime: SAnime): List<SEpisode> {
         val epsUrl = "$apiUrl/anime/releases/${anime.url}".toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "episodes.id,episodes.name,episodes.ordinal,episodes.sort_order,episodes.preview,episodes.updated_at")
+            addQueryParameter("include", episodesFilter)
         }.build()
 
         val episodes = client.get(epsUrl, apiHeaders).parseAs<EpisodeList>().episodes.sortedByDescending { it.sortOrder }
@@ -244,14 +242,28 @@ class AniLiberty :
 
     override fun episodeListParse(response: Response): List<SEpisode> = throw UnsupportedOperationException()
 
-    // ============================== Hosters ===============================
+    // =============================== Videos ===============================
 
-    override fun seasonListParse(response: Response): List<SAnime> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getHosterList(episode: SEpisode): List<Hoster> = listOf(
+        Hoster(
+            hosterName = "AniLiberty",
+            hosterUrl = episode.url,
+        ),
+    )
 
-    override fun hosterListParse(response: Response): List<Hoster> {
-        TODO("Not yet implemented")
+    override suspend fun getVideoList(hoster: Hoster): List<Video> {
+        Log.d("AniLiberty", "Hoster URL: ${hoster.hosterUrl}")
+        val url = hoster.hosterUrl.toHttpUrl().newBuilder().apply {
+            addQueryParameter("include", "hls_480,hls_720,hls_1080")
+        }.build()
+
+        val videos = client.get(url = url, headers = apiHeaders).parseAs<VideoData>()
+
+        return listOf(
+            Video(videoUrl = videos.hqStream, videoTitle = "1080p", resolution = 1080),
+            Video(videoUrl = videos.mqStream, videoTitle = "720p", resolution = 720),
+            Video(videoUrl = videos.lqStream, videoTitle = "480p", resolution = 480),
+        )
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) {
@@ -295,4 +307,7 @@ class AniLiberty :
             append(description)
         }
     }
+
+    override fun hosterListParse(response: Response): List<Hoster> = throw UnsupportedOperationException()
+    override fun seasonListParse(response: Response): List<SAnime> = throw UnsupportedOperationException()
 }

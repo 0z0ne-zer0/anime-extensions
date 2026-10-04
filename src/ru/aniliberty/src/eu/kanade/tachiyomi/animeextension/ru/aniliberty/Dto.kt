@@ -9,21 +9,21 @@ class SearchReleaseData(
     val alias: String = "",
     val name: ReleaseName,
     val poster: ReleasePoster,
-    @SerialName("description") val animeDescription: String? = null,
+    @SerialName("description") val animeDescription: String?,
     val genres: List<ReleaseGenre>,
 ) {
     @Serializable
     class ReleaseName(
         @SerialName("main") val russian: String,
         val english: String,
-        val alternative: String? = null,
+        val alternative: String?,
     )
 
     @Serializable
     class ReleasePoster(
-        val src: String? = null,
-        val preview: String? = null,
-        val thumbnail: String? = null,
+        val src: String?,
+        val preview: String?,
+        val thumbnail: String?,
     )
 
     @Serializable
@@ -58,8 +58,8 @@ class ReleaseData(
     val year: Int,
     val season: ReleaseSeason,
     @SerialName("is_ongoing") val isOngoing: Boolean,
-    val description: String? = null,
-    val notification: String? = null,
+    val description: String?,
+    val notification: String?,
     @SerialName("is_in_production") val isInProduction: Boolean = false,
     @SerialName("is_blocked_by_geo") val isBlockedByGeo: Boolean = false,
     @SerialName("is_blocked_by_copyrights") val isBlockedByCopyright: Boolean = false,
@@ -67,7 +67,7 @@ class ReleaseData(
 ) {
     @Serializable
     class ReleaseSeason(
-        val description: String? = null,
+        val description: String?,
     )
 
     @Serializable
@@ -84,7 +84,7 @@ class EpisodeList(
     @Serializable
     class EpisodeData(
         val id: String,
-        val name: String? = null,
+        val name: String?,
         val ordinal: Float,
         @SerialName("sort_order") val sortOrder: Int,
         val preview: EpisodePreview,
@@ -92,9 +92,16 @@ class EpisodeList(
     ) {
         @Serializable
         class EpisodePreview(
-            val src: String? = null,
-            val preview: String? = null,
-            val thumbnail: String? = null,
+            val src: String?,
+            val preview: String?,
+            val thumbnail: String?,
         )
     }
 }
+
+@Serializable
+class VideoData(
+    @SerialName("hls_480") val lqStream: String,
+    @SerialName("hls_720") val mqStream: String,
+    @SerialName("hls_1080") val hqStream: String,
+)
