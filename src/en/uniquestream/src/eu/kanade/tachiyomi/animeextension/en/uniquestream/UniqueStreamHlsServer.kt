@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.animeextension.en.uniquestream
 
 import android.util.Base64
+import keiyoushi.utils.decodeHex
 import okhttp3.Dns
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -258,18 +259,22 @@ object UniqueStreamHlsServer : NanoHTTPD("127.0.0.1", 0) {
             throw IOException("Invalid AES-128 key length: ${key.size}")
         }
 
+        val ivBytes = try {
+            iv.decodeHex()
+        } catch (e: IllegalArgumentException) {
+            throw IOException("Invalid AES-128 IV", e)
+        }
+
         return try {
             val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
             cipher.init(
                 Cipher.DECRYPT_MODE,
                 SecretKeySpec(key, "AES"),
-                IvParameterSpec(iv.hexToByteArray()),
+                IvParameterSpec(ivBytes),
             )
             cipher.doFinal(data)
         } catch (e: GeneralSecurityException) {
             throw IOException("Failed to decrypt AES-128 segment", e)
-        } catch (e: IllegalArgumentException) {
-            throw IOException("Invalid AES-128 IV", e)
         }
     }
 
@@ -352,8 +357,4 @@ object UniqueStreamHlsServer : NanoHTTPD("127.0.0.1", 0) {
     private fun String.normalizeHlsIv(): String = removePrefix("0x").removePrefix("0X").padStart(32, '0')
 
     private fun encode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
-
-    private fun String.hexToByteArray(): ByteArray = ByteArray(length / 2) { index ->
-        substring(index * 2, index * 2 + 2).toInt(16).toByte()
-    }
 }

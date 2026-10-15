@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.animeextension.en.animepahe
 
 import eu.kanade.tachiyomi.animesource.model.Video
+import keiyoushi.utils.decodeHex
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -339,18 +340,22 @@ object AnimePaheHlsServer : NanoHTTPD(0) {
             throw IOException("Invalid AES-128 IV length: ${normalizedIv.length}")
         }
 
+        val ivBytes = try {
+            normalizedIv.decodeHex()
+        } catch (e: IllegalArgumentException) {
+            throw IOException("Invalid AES-128 IV", e)
+        }
+
         return try {
             val cipher = Cipher.getInstance("AES/CBC/NoPadding")
             cipher.init(
                 Cipher.DECRYPT_MODE,
                 SecretKeySpec(key, "AES"),
-                IvParameterSpec(normalizedIv.hexToByteArray()),
+                IvParameterSpec(ivBytes),
             )
             cipher.doFinal(data)
         } catch (e: GeneralSecurityException) {
             throw IOException("Failed to decrypt AES-128 segment", e)
-        } catch (e: NumberFormatException) {
-            throw IOException("Invalid AES-128 IV", e)
         }
     }
 
@@ -359,8 +364,4 @@ object AnimePaheHlsServer : NanoHTTPD(0) {
     private fun String.normalizeHlsIv(): String = removePrefix("0x")
         .removePrefix("0X")
         .padStart(32, '0')
-
-    private fun String.hexToByteArray(): ByteArray = ByteArray(length / 2) { index ->
-        substring(index * 2, index * 2 + 2).toInt(16).toByte()
-    }
 }
