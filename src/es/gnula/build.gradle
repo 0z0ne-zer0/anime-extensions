@@ -2,6 +2,7 @@ ext {
     extName = 'Gnula'
     extClass = '.Gnula'
     extVersionCode = 52
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

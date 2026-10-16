@@ -2,6 +2,7 @@ ext {
     extName = 'OtakuDesu'
     extClass = '.OtakuDesu'
     extVersionCode = 44
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

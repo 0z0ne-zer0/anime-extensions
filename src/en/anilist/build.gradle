@@ -3,6 +3,7 @@ ext {
     extClass = '.AniList'
     libVersion = 16
     extVersionCode = 15
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

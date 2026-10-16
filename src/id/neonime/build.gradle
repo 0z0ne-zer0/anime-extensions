@@ -2,6 +2,7 @@ ext {
     extName = 'NeoNime'
     extClass = '.NeoNime'
     extVersionCode = 27
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -4,6 +4,7 @@ ext {
     themePkg = 'dooplay'
     baseUrl = 'https://www1.verpelis.top'
     overrideVersionCode = 10
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

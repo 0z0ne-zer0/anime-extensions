@@ -2,6 +2,7 @@ ext {
     extName = 'AnimeWorld India'
     extClass = '.AnimeWorldIndiaFactory'
     extVersionCode = 24
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -4,6 +4,7 @@ ext {
     themePkg = 'dopeflix'
     baseUrl = 'https://la.movie'
     overrideVersionCode = 2
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

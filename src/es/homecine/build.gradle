@@ -2,6 +2,7 @@ ext {
     extName = 'HomeCine'
     extClass = '.HomeCine'
     extVersionCode = 21
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

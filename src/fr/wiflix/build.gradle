@@ -4,6 +4,7 @@ ext {
     themePkg = 'datalifeengine'
     baseUrl = 'https://flemmix.best'
     overrideVersionCode = 30
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

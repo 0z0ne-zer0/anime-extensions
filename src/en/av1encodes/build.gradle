@@ -4,6 +4,7 @@ ext {
     baseUrl = 'https://av1encodes.com'
     libVersion = 16
     extVersionCode = 2
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

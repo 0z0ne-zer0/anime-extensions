@@ -2,6 +2,7 @@ ext {
     extName = 'FASELHD'
     extClass = '.FASELHD'
     extVersionCode = 29
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

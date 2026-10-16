@@ -2,6 +2,7 @@ ext {
     extName = 'AnimeBum'
     extClass = '.AnimeBum'
     extVersionCode = 22
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

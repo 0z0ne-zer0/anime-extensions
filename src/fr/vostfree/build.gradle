@@ -2,6 +2,7 @@ ext {
     extName = 'Vostfree'
     extClass = '.Vostfree'
     extVersionCode = 43
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

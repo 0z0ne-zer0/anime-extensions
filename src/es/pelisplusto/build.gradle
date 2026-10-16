@@ -4,6 +4,7 @@ ext {
     themePkg = 'pelisplus'
     baseUrl = 'https://tioplus.app'
     overrideVersionCode = 82
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -2,6 +2,7 @@ ext {
     extName = 'Hackstore'
     extClass = '.Hackstore'
     extVersionCode = 43
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

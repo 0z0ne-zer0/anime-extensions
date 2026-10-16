@@ -2,6 +2,7 @@ ext {
     extName = 'PelisForte'
     extClass = '.PelisForte'
     extVersionCode = 53
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

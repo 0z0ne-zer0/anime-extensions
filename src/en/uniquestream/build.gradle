@@ -3,6 +3,7 @@ ext {
     extClass = '.UniqueStream'
     libVersion = 16
     extVersionCode = 10
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -2,6 +2,7 @@ ext {
     extName = 'Serienstream'
     extClass = '.Serienstream'
     extVersionCode = 35
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

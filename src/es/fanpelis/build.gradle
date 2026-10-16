@@ -2,6 +2,7 @@ ext {
     extName = 'FanPelis'
     extClass = '.FanPelis'
     extVersionCode = 26
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

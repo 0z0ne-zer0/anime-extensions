@@ -2,6 +2,7 @@ ext {
     extName = 'Latanime'
     extClass = '.Latanime'
     extVersionCode = 44
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

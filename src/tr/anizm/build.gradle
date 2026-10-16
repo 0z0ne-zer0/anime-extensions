@@ -2,6 +2,7 @@ ext {
     extName = 'Anizm'
     extClass = '.Anizm'
     extVersionCode = 47
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

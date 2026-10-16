@@ -2,6 +2,7 @@ ext {
     extName = 'LACartoons'
     extClass = '.Lacartoons'
     extVersionCode = 28
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

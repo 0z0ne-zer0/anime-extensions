@@ -4,6 +4,7 @@ ext {
     themePkg = 'wcotheme'
     baseUrl = 'https://www.wcoflix.tv'
     overrideVersionCode = 16
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

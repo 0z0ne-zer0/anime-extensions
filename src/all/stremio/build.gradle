@@ -4,6 +4,7 @@ ext {
     libVersion = 16
     extVersionCode = 11
     extNames = ["Stremio"]
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

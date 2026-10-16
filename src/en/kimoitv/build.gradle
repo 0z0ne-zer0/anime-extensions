@@ -2,6 +2,7 @@ ext {
     extName = 'KimoiTV'
     extClass = '.KimoiTV'
     extVersionCode = 1
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

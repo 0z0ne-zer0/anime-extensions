@@ -2,6 +2,7 @@ ext {
     extName = 'SeriesKao'
     extClass = '.Serieskao'
     extVersionCode = 25
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

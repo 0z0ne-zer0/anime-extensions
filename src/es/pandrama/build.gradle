@@ -2,6 +2,7 @@ ext {
     extName = 'Pandrama'
     extClass = '.Pandrama'
     extVersionCode = 12
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

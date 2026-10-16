@@ -4,6 +4,7 @@ ext {
     themePkg = 'dooplay'
     baseUrl = 'https://ssl.jetanimes.com'
     overrideVersionCode = 20
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

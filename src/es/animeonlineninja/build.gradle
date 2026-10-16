@@ -4,6 +4,7 @@ ext {
     themePkg = 'dooplay'
     baseUrl = 'https://ww3.animeonline.ninja'
     overrideVersionCode = 63
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

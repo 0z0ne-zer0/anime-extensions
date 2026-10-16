@@ -5,6 +5,7 @@ ext {
     baseUrl = 'https://anichi.to'
     libVersion = 16
     overrideVersionCode = 0
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

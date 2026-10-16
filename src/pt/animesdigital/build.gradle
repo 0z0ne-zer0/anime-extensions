@@ -3,6 +3,7 @@ ext {
     extName = 'Animes Digital'
     extClass = '.AnimesDigital'
     extVersionCode = 10
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

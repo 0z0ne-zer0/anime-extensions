@@ -2,6 +2,7 @@ ext {
     extName = 'KickAssAnime'
     extClass = '.KickAssAnime'
     extVersionCode = 62
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

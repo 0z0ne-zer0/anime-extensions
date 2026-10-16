@@ -5,6 +5,7 @@ ext {
     baseUrl = 'https://animewave.to'
     libVersion = 16
     overrideVersionCode = 2
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -4,6 +4,7 @@ ext {
     themePkg = 'dooplay'
     baseUrl = 'https://kinoking.cc'
     overrideVersionCode = 33
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

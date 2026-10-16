@@ -2,6 +2,7 @@ ext {
     extName = 'AnimeUnity'
     extClass = '.AnimeUnity'
     extVersionCode = 9
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -4,6 +4,7 @@ ext {
     themePkg = 'animestream'
     baseUrl = 'https://luciferdonghua.in'
     overrideVersionCode = 20
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

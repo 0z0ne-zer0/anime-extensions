@@ -2,6 +2,7 @@ ext {
     extName = 'AnimeFLV'
     extClass = '.AnimeFlv'
     extVersionCode = 78
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

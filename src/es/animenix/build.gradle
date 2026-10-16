@@ -4,6 +4,7 @@ ext {
     themePkg = 'dooplay'
     baseUrl = 'https://animenix.com'
     overrideVersionCode = 23
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

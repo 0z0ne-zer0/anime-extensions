@@ -2,6 +2,7 @@ ext {
     extName = 'Anime Srbija'
     extClass = '.AnimeSrbija'
     extVersionCode = 24
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

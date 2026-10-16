@@ -3,6 +3,7 @@ ext {
     extClass = '.ANIMEWORLD'
     extVersionCode = 61
     libVersion = 16
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

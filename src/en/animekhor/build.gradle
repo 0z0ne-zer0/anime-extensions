@@ -4,6 +4,7 @@ ext {
     themePkg = 'animestream'
     baseUrl = 'https://animekhor.org'
     overrideVersionCode = 22
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -2,6 +2,7 @@ ext {
     extName = 'LocoPelis'
     extClass = '.LocoPelis'
     extVersionCode = 41
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

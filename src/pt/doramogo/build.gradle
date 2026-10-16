@@ -2,6 +2,7 @@ ext {
     extName = 'Doramogo'
     extClass = '.Doramogo'
     extVersionCode = 21
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

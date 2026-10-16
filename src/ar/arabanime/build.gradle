@@ -2,6 +2,7 @@ ext {
     extName = 'ArabAnime'
     extClass = '.ArabAnime'
     extVersionCode = 2
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

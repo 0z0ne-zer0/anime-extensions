@@ -2,6 +2,7 @@ ext {
     extName = 'Okanime'
     extClass = '.Okanime'
     extVersionCode = 28
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

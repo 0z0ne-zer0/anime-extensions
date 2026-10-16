@@ -4,6 +4,7 @@ ext {
     libVersion = 16
     extVersionCode = 32
     extNames = ["Jellyfin (1)", "Jellyfin (2)", "Jellyfin (3)"]
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

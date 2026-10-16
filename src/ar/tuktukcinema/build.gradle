@@ -2,6 +2,7 @@ ext {
     extName = 'Tuktuk Cinema'
     extClass = '.Tuktukcinema'
     extVersionCode = 9
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -2,6 +2,7 @@ ext {
     extName = 'EstrenosDoramas'
     extClass = '.EstrenosDoramas'
     extVersionCode = 21
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

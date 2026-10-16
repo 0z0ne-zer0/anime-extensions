@@ -2,6 +2,7 @@ ext {
     extName = 'MonosChinos'
     extClass = '.MonosChinos'
     extVersionCode = 57
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

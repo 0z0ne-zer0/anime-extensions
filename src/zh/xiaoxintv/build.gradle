@@ -2,6 +2,7 @@ ext {
     extName = 'Xiaoxintv'
     extClass = '.Xiaoxintv'
     extVersionCode = 1
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

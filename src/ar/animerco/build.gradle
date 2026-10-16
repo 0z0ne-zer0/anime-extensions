@@ -2,6 +2,7 @@ ext {
     extName = 'Animerco'
     extClass = '.Animerco'
     extVersionCode = 60
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

@@ -4,6 +4,7 @@ ext {
     themePkg = 'pelisplus'
     baseUrl = 'https://www.pelisplushd.la'
     overrideVersionCode = 82
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

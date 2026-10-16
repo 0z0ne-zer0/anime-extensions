@@ -2,6 +2,7 @@ ext {
     extName = 'Egy Dead'
     extClass = '.EgyDead'
     extVersionCode = 30
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

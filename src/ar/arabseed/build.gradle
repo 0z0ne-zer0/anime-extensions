@@ -2,6 +2,7 @@ ext {
     extName = 'Arab Seed'
     extClass = '.ArabSeed'
     extVersionCode = 32
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

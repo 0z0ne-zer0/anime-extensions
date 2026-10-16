@@ -3,6 +3,7 @@ ext {
     extClass = '.AnimeTake'
     libVersion = 16
     extVersionCode = 21
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

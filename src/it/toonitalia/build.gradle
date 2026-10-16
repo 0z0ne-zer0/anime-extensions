@@ -2,6 +2,7 @@ ext {
     extName = 'Toonitalia'
     extClass = '.Toonitalia'
     extVersionCode = 38
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"

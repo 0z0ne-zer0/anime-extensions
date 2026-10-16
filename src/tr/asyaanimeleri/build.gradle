@@ -4,6 +4,7 @@ ext {
     themePkg = 'animestream'
     baseUrl = 'https://asyaanimeleri.top'
     overrideVersionCode = 19
+    isNsfw = false
 }
 
 apply plugin: "kei.plugins.extension.legacy"
