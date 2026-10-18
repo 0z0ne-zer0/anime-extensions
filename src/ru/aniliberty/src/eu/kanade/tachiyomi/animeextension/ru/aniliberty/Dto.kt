@@ -30,9 +30,7 @@ class SearchReleaseData(
     class ReleaseGenre(
         val id: Int,
         val name: String,
-    ) {
-        override fun toString(): String = name
-    }
+    )
 }
 
 @Serializable
