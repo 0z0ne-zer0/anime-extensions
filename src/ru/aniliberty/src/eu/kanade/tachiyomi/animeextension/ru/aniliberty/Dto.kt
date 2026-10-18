@@ -102,4 +102,12 @@ class VideoData(
     @SerialName("hls_480") val lqStream: String,
     @SerialName("hls_720") val mqStream: String,
     @SerialName("hls_1080") val hqStream: String,
-)
+    val opening: VideoTimestamp? = null,
+    val ending: VideoTimestamp? = null,
+) {
+    @Serializable
+    class VideoTimestamp(
+        val start: Double,
+        val stop: Double,
+    )
+}

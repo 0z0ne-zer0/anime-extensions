@@ -7,9 +7,11 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.AnimesPage
+import eu.kanade.tachiyomi.animesource.model.ChapterType
 import eu.kanade.tachiyomi.animesource.model.Hoster
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
+import eu.kanade.tachiyomi.animesource.model.TimeStamp
 import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import keiyoushi.network.get
@@ -231,15 +233,31 @@ class AniLiberty : AnimeHttpSource() {
     override suspend fun getVideoList(hoster: Hoster): List<Video> {
         Log.d("AniLiberty", "Hoster URL: ${hoster.hosterUrl}")
         val url = hoster.hosterUrl.toHttpUrl().newBuilder().apply {
-            addQueryParameter("include", "hls_480,hls_720,hls_1080")
+            addQueryParameter("include", "hls_480,hls_720,hls_1080,opening,ending")
         }.build()
 
         val videos = client.get(url = url, headers = apiHeaders).parseAs<VideoData>()
 
+        Log.d("AniLiberty", "Got videos: ${videos.hqStream}")
+
+        val timestamps = mutableListOf<TimeStamp>()
+        if (videos.opening != null) {
+            timestamps.add(
+                TimeStamp(videos.opening.start, videos.opening.stop, "Опенинг", type = ChapterType.Opening),
+            )
+            Log.d("AniLiberty", "Added opening timestamps")
+        }
+        if (videos.ending != null) {
+            timestamps.add(
+                TimeStamp(videos.ending.start, videos.ending.stop, "Эндинг", type = ChapterType.Ending),
+            )
+            Log.d("AniLiberty", "Added ending timestamps")
+        }
+
         return listOf(
-            Video(videoUrl = videos.hqStream, videoTitle = "1080p", resolution = 1080),
-            Video(videoUrl = videos.mqStream, videoTitle = "720p", resolution = 720),
-            Video(videoUrl = videos.lqStream, videoTitle = "480p", resolution = 480),
+            Video(videoUrl = videos.hqStream, videoTitle = "1080p", resolution = 1080, timestamps = timestamps),
+            Video(videoUrl = videos.mqStream, videoTitle = "720p", resolution = 720, timestamps = timestamps),
+            Video(videoUrl = videos.lqStream, videoTitle = "480p", resolution = 480, timestamps = timestamps),
         )
     }
 
