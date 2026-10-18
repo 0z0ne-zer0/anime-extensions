@@ -174,7 +174,7 @@ class AniLiberty : AnimeHttpSource() {
 
         return SAnime.create().apply {
             initialized = true
-            genre = show.genres.joinToString()
+            genre = show.genres.joinToString { it.name }
             status = if (show.isOngoing) SAnime.ONGOING else SAnime.COMPLETED
             description = show.descriptionBuilder()
         }
