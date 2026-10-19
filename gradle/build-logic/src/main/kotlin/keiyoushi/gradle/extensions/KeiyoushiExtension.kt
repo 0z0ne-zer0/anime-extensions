@@ -41,6 +41,8 @@ abstract class KeiyoushiExtension @Inject constructor(
     abstract val deeplinks: ListProperty<DeeplinkSpec>
 
     fun deeplink(block: DeeplinkSpec.() -> Unit) = addDeeplink(objects, deeplinks, block)
+
+    abstract val torrent: Property<Boolean>
 }
 
 abstract class KeiyoushiMultisrcExtension @Inject constructor(

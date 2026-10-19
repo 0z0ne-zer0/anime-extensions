@@ -68,6 +68,7 @@ index = index_pb2.Index(
                 versionCode=extension["code"],
                 versionName=extension["version"],
                 contentWarning=int(extension.get("contentWarning", 2 if extension.get("nsfw", 0) == 1 else 0)) + 1,
+                isTorrent=extension.get("torrent", 0) == 1,
                 sources=[
                     index_pb2.Source(
                         id=int(source["id"]),

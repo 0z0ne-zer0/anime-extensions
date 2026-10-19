@@ -138,6 +138,8 @@ class PluginExtension : Plugin<Project> {
 
         val nsfwProvider = keiyoushi.contentWarning.map { if (it == ContentWarning.SAFE) "0" else "1" }
 
+        val torrentProvider = keiyoushi.torrent.map { if (it) "1" else "0" }.orElse("0")
+
         val contentWarningProvider = keiyoushi.contentWarning.map {
             when (it) {
                 ContentWarning.SAFE -> "0"
@@ -190,6 +192,7 @@ class PluginExtension : Plugin<Project> {
                 variant.manifestPlaceholders.put("tachiyomix.name", keiyoushi.name)
                 variant.manifestPlaceholders.put("extClass", extClassProvider)
                 variant.manifestPlaceholders.put("nsfw", nsfwProvider)
+                variant.manifestPlaceholders.put("torrent", torrentProvider)
                 variant.manifestPlaceholders.put("tachiyomix.contentWarning", contentWarningProvider)
                 variant.manifestPlaceholders.put("tachiyomix.extensionLib", keiyoushi.libVersion)
             }

@@ -20,6 +20,7 @@ VERSION_CODE_REGEX = re.compile(r"versionCode='([^']+)'")
 VERSION_NAME_REGEX = re.compile(r"versionName='([^']+)'")
 CONTENT_WARNING_REGEX = re.compile(r"'tachiyomix.contentWarning' value='([^']+)'")
 EXTENSION_LIB_REGEX = re.compile(r"'tachiyomix.extensionLib' value='([^']+)'")
+TORRENT_REGEX = re.compile(r"'tachiyomi.animeextension.torrent' value='([^']+)'")
 APPLICATION_LABEL_REGEX = re.compile(r"^application-label:'([^']+)'", re.MULTILINE)
 APPLICATION_ICON_320_REGEX = re.compile(r"^application-icon-320:'([^']+)'", re.MULTILINE)
 LANGUAGE_REGEX = re.compile(r"aniyomi-([^.]+)")
@@ -71,6 +72,7 @@ for apk in REPO_APK_DIR.iterdir():
 
     content_warning = int(CONTENT_WARNING_REGEX.search(badging).group(1))
     extension_lib = parse_extension_lib(EXTENSION_LIB_REGEX.search(badging).group(1).strip())
+    torrent = int(TORRENT_REGEX.search(badging).group(1))
 
     extension_data = {
         "name": APPLICATION_LABEL_REGEX.search(badging).group(1),
@@ -81,6 +83,7 @@ for apk in REPO_APK_DIR.iterdir():
         "version": VERSION_NAME_REGEX.search(package_info).group(1),
         "contentWarning": content_warning,
         "libVersion": extension_lib,
+        "torrent": torrent,
         "sources": [
             {
                 "name": source["name"],

@@ -303,6 +303,7 @@ yuzono {
 | `versionCode`    | The extension version code. This must be a positive integer and incremented with any change to the code. Do not bump for changes that do not affect users, such as changing a private function to a public function. |
 | `contentWarning` | Content safety classification. Must be set explicitly to one of `ContentWarning.SAFE`, `ContentWarning.MIXED`, or `ContentWarning.NSFW`.                                                                             |
 | `libVersion`     | The extension library version. Must be set explicitly: `"14"`, or `"16"` for extensions that implement the [lib 16](#extensions-lib-16) API.                                                                         |
+| `torrent`        | Optional. Set to `true` if the extension serves torrents (magnet or `.torrent` links, or `TorrentUtils`): the app starts its torrent server for it and shows a Torrent badge.                                        |
 | `deeplink {}`    | Declares a URL deeplink intent filter. See [URL intent filter](#url-intent-filter).                                                                                                                                  |
 
 The extension's version name is generated automatically by concatenating `libVersion` and the calculated version code.

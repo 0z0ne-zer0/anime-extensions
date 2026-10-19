@@ -8,6 +8,7 @@ yuzono {
     versionCode = 4
     contentWarning = ContentWarning.NSFW
     libVersion = "14"
+    torrent = true
 
     deeplink {
         host("nyaa.si")
