@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.widget.Button
 import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceScreen
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 class CustomUrlPreferences(
@@ -67,12 +68,15 @@ class CustomUrlPreferences(
                     val sanitizedValue = if (text.isBlank()) {
                         defaultUrl
                     } else {
-                        val scheme = httpUrl!!.scheme
-                        val host = httpUrl.host
-                        val port = httpUrl.port
-                        val defaultPort = if (scheme == "https") 443 else 80
-                        val portStr = if (port == defaultPort) "" else ":$port"
-                        "$scheme://$host$portStr"
+                        // Keep only the origin, so a page URL pasted from the address bar still gives the site's base URL.
+                        // HttpUrl.Builder puts back the brackets of an IPv6 host, which HttpUrl.host drops.
+                        HttpUrl.Builder()
+                            .scheme(httpUrl!!.scheme)
+                            .host(httpUrl.host)
+                            .port(httpUrl.port)
+                            .build()
+                            .toString()
+                            .trimEnd('/')
                     }
 
                     (preference as EditTextPreference).text = sanitizedValue
