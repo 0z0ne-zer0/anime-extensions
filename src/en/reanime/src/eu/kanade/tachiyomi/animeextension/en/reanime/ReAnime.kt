@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.awaitSuccess
+import keiyoushi.annotation.Source
 import keiyoushi.network.rateLimit
 import keiyoushi.utils.addListPreference
 import keiyoushi.utils.get
@@ -53,24 +54,18 @@ import java.util.Locale
 import java.util.TimeZone.getTimeZone
 import kotlin.math.roundToInt
 
-class ReAnime :
+@Source
+abstract class ReAnime :
     AnimeHttpSource(),
     ConfigurableAnimeSource {
-
-    override val name = "Re:ANIME"
-
-    override val lang = "en"
 
     override val supportsLatest = true
 
     private val preferences: SharedPreferences by getPreferencesLazy()
-    override val baseUrl: String
-        get() = preferences.getString(PREF_DOMAIN_KEY, PREF_DOMAIN_DEFAULT) ?: PREF_DOMAIN_DEFAULT
-
     private val apiUrl: String
         get() = "$baseUrl/api/v1"
 
-    private val flixUrl = "$baseUrl/api/flix"
+    private val flixUrl: String get() = "$baseUrl/api/flix"
 
     private val preferredLang: String
         get() = preferences.getString(PREF_LANG_KEY, PREF_LANG_DEFAULT) ?: PREF_LANG_DEFAULT
@@ -99,12 +94,12 @@ class ReAnime :
         get() = preferences.getBoolean(PREF_DOWNLOAD_KEY, PREF_DOWNLOAD_DEFAULT)
 
     private fun apiHeaders(referer: String = "$baseUrl/home"): Headers = headers.newBuilder()
-        .add("Accept", "application/json, text/plain, */*")
-        .add("Accept-Language", "en-US,en;q=0.9")
-        .add("Referer", referer)
-        .add("Sec-Fetch-Dest", "empty")
-        .add("Sec-Fetch-Mode", "cors")
-        .add("Sec-Fetch-Site", "same-origin")
+        .set("Accept", "application/json, text/plain, */*")
+        .set("Accept-Language", "en-US,en;q=0.9")
+        .set("Referer", referer)
+        .set("Sec-Fetch-Dest", "empty")
+        .set("Sec-Fetch-Mode", "cors")
+        .set("Sec-Fetch-Site", "same-origin")
         .build()
 
     override val client = network.client.newBuilder()
@@ -207,15 +202,14 @@ class ReAnime :
     @RequiresApi(Build.VERSION_CODES.O)
     override fun searchAnimeRequest(page: Int, query: String, filters: AnimeFilterList): Request {
         val url = "$apiUrl/search".toHttpUrl().newBuilder().apply {
+            if (query.isNotBlank()) addQueryParameter("q", query)
             val limit = 36
             addQueryParameter("limit", limit.toString())
             addQueryParameter("offset", ((page - 1) * limit).toString())
 
-            if (query.isNotBlank()) addQueryParameter("q", query)
-
             filters.forEach { filter ->
                 when (filter) {
-                    is Filters.SortFilter -> addQueryParameter("sort", filter.getValue())
+                    is Filters.SortFilter -> filter.getValue()?.let { addQueryParameter("sort", it) }
                     is Filters.FormatFilter -> filter.getValue()?.let { addQueryParameter("format", it) }
                     is Filters.StatusFilter -> filter.getValue()?.let { addQueryParameter("status", it) }
                     is Filters.SeasonFilter -> filter.getValue()?.let { addQueryParameter("season", it) }
@@ -258,7 +252,7 @@ class ReAnime :
     }
 
     // =========================== Anime Details ============================
-    private val detailsUrl = "$baseUrl/anime"
+    private val detailsUrl: String get() = "$baseUrl/anime"
     override fun getAnimeUrl(anime: SAnime): String = "$detailsUrl/${anime.url}"
 
     override fun animeDetailsRequest(anime: SAnime): Request = GET("$detailsFromApiUrl/${anime.url}", apiHeaders(getAnimeUrl(anime)))
@@ -512,7 +506,7 @@ class ReAnime :
 
     override fun relatedAnimeListParse(response: Response): List<SAnime> = throw UnsupportedOperationException()
 
-    private val detailsFromApiUrl = "$apiUrl/anime"
+    private val detailsFromApiUrl: String get() = "$apiUrl/anime"
 
     private suspend fun fetchRecommendations(slug: String): List<RecommendationDto> {
         return try {
@@ -759,8 +753,8 @@ class ReAnime :
                     val aid = EMBED_AID_REGEX.find(dataLink)?.groupValues?.get(1) ?: return@parallelCatchingFlatMap emptyList()
 
                     val dlHeaders = headers.newBuilder()
-                        .add("Accept", "*/*")
-                        .add("Referer", "$flixCloudUrl/")
+                        .set("Accept", "*/*")
+                        .set("Referer", "$flixCloudUrl/")
                         .build()
 
                     val ddlData = FlixCloudDdl.fetchMetadata(client, dlHeaders, aid) ?: return@parallelCatchingFlatMap emptyList()
@@ -852,13 +846,13 @@ class ReAnime :
 
     private suspend fun extractFromServer(dataLink: String, label: String): List<Video> {
         val flixHeaders = headers.newBuilder()
-            .add("Accept", "*/*")
-            .add("Origin", flixCloudUrl)
-            .add("Referer", "$flixCloudUrl/")
+            .set("Accept", "*/*")
+            .set("Origin", flixCloudUrl)
+            .set("Referer", "$flixCloudUrl/")
             .build()
 
         val decHeaders = headers.newBuilder()
-            .add("Accept", "*/*")
+            .set("Accept", "*/*")
             .build()
 
         return try {
@@ -1047,8 +1041,8 @@ class ReAnime :
             )
 
             val dlHeaders = headers.newBuilder()
-                .add("Accept", "*/*")
-                .add("Referer", "$flixCloudUrl/")
+                .set("Accept", "*/*")
+                .set("Referer", "$flixCloudUrl/")
                 .build()
 
             val fileUrl = FlixCloudDdl.resolveUrl(client, dlHeaders, ddlData) ?: return null
@@ -1124,15 +1118,6 @@ class ReAnime :
     // ============================== Settings ==============================
     override fun setupPreferenceScreen(screen: PreferenceScreen) {
         screen.addListPreference(
-            key = PREF_DOMAIN_KEY,
-            title = "Preferred Domain",
-            entries = PREF_DOMAIN_ENTRIES,
-            entryValues = PREF_DOMAIN_VALUES,
-            default = PREF_DOMAIN_DEFAULT,
-            summary = "%s",
-        )
-
-        screen.addListPreference(
             key = PREF_TITLE_LANG_KEY,
             title = "Preferred Title Language",
             entries = PREF_TITLE_LANG_ENTRIES,
@@ -1207,10 +1192,6 @@ class ReAnime :
 
     // Status domain: https://restatus.me/
     companion object {
-        private const val PREF_DOMAIN_KEY = "preferred_domain"
-        private val PREF_DOMAIN_ENTRIES = listOf("reanime.to", "reanime.cz", "reanime.wtf")
-        private val PREF_DOMAIN_VALUES = listOf("https://reanime.to", "https://reanime.cz", "https://reanime.wtf")
-        private const val PREF_DOMAIN_DEFAULT = "https://reanime.to"
         private const val PREF_LANG_KEY = "preferred_lang"
         private val PREF_LANG_ENTRIES = listOf("All", "Sub", "Dub")
         private val PREF_LANG_VALUES = listOf("", "sub", "dub")
@@ -1284,7 +1265,6 @@ class ReAnime :
         private val XOR_MASK_REGEX = Regex("""for\(var f=\[(\d{1,3}(?:,\d{1,3}){15})]""")
 
         private val EMBED_AID_REGEX = Regex("""/e/([a-z0-9]+)""")
-        private val RESOLUTION_REGEX = Regex("""(\d{3,4}p)""")
 
         fun parseStatus(status: String?): Int = when (status) {
             "RELEASING", "Releasing" -> SAnime.ONGOING

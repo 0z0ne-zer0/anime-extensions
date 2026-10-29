@@ -4,13 +4,16 @@ plugins {
 
 yuzono {
     name = "AniHQ"
-    className = "AniHQ"
-    versionCode = 3
-    contentWarning = ContentWarning.NSFW
+    versionCode = 4
+    contentWarning = ContentWarning.MIXED
     libVersion = "16"
 
+    source {
+        lang = "en"
+        baseUrl = "https://anihq.cc"
+    }
+
     deeplink {
-        host("anihq.cc")
         path("/anime-show/..*")
         path("/watch/..*")
     }
